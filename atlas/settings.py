@@ -74,7 +74,16 @@ WSGI_APPLICATION = "atlas.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
+# for MySql database remote server
+if os.environ.get('DB') == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        },
+    }
+else:
+    DATABASES = {
          'default': {
              'ENGINE': 'django.db.backends.mysql',
              'NAME': SECRETS['DB_NAME'],
@@ -82,7 +91,6 @@ DATABASES = {
              'PASSWORD': SECRETS['DB_PASSWORD'],
              'HOST': SECRETS['DB_HOST'],
              'PORT': '3306',
-
          },
      }
 
