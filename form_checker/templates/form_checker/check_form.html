@@ -19,7 +19,7 @@
                 class="form-select {% if form.team.errors %}is-invalid{% endif %}">
                 {% for option in form.team.field.choices %}
                 <!-- prettier-ignore -->
-                <option value="{{ option.0 }}" >
+                <option value="{{ option.0 }}">
                     <!-- <option value="{{ option.0 }}" {% if option.0 == form.team.value %} selected {% endif %}> -->
                     {{ option.1 }}
                 </option>
@@ -44,9 +44,10 @@
         </div>
         <div class="mb-3">
             <label for="{{ form.html.id_for_label }}" class="form-label">HTML</label>
-            <input type="text" name="{{ form.html.name }}"
+            <textarea type="text" name="{{ form.html.name }}" row="20"
                 class="form-control {% if form.html.errors %}is-invalid{% endif %}" id="{{ form.html.id_for_label }}"
                 value="">
+                </textarea>
             {% if form.html.errors %}
             <div class="invalid-feedback">
                 {{ form.html.errors }}

@@ -1,0 +1,29 @@
+{%extends 'base.html'%}
+{% load static %}
+
+{%block content%}
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Префикс</th>
+                <th>Имя</th>
+                <th>Статус</th>
+                <th>Сообщение</th>
+                <th>Иконка</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in check_results %}
+            <tr class="table-{{result.status}}">
+                <td>{{ result.prefix }}</td>
+                <td>{{ result.name }}</td>
+                <td>{{ result.status|capfirst }}</td>
+                <td>{{ result.message }}</td>
+                <td><span class="badge rounded-pill bg-{{result.status}}">{{result.status|capfirst}}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{%endblock%}

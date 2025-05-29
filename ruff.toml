@@ -25,26 +25,25 @@ select = [
     "BLE",
 ]
 ignore = [
-    "COM819",
     "ANN101",
     "ANN102",
     "ANN204",
-    "ANN001",
-    "ANN002",
-    "ANN003",
-
 ]
 
 [lint.extend-per-file-ignores]
 "*/views.py" = [
     "ARG002",  # args
+    "ANN001",  # type annotation
+    "ANN002",  # Missing type annotation for `*args`
+    "ANN003",  # Missing type annotation for `**kwargs`
     "ANN201",  # return type in views
+    "ARG001",  # Unused function argument
 ]
 
 "*/serializers.py" = [
     "ARG002",  # args
-    #"ANN201",  # return type in serializers
 ]
+
 
 [format]
 quote-style = "double"
