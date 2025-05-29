@@ -17,7 +17,8 @@
         height: calc(100vh - 56px);
         align-items: center;
     }
-    #login-form-wraper label{
+
+    #login-form-wraper label {
         color: white;
     }
 </style>
@@ -29,9 +30,13 @@
             <div class="col-4 d-flex align-items-center">
                 <form method="POST" action="{%url 'login'%}">
                     {%csrf_token%}
+                    <div class="invalid-feedback" {%if form.non_field_errors %}style="display:block" {%endif%}>
+                        {{ form.non_field_errors }}
+                    </div>
                     <div class="mb-3">
                         <label for="exampleInputEmail1" class="form-label">Login</label>
-                        <input name="username" type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                        <input name="username" type="text" class="form-control" id="exampleInputEmail1"
+                            aria-describedby="emailHelp">
                     </div>
                     <div class="mb-3">
                         <label for="exampleInputPassword1" class="form-label">Password</label>
