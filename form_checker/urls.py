@@ -6,5 +6,5 @@ from . import views
 app_name = 'form_checker'
 
 urlpatterns = [
-    path('', views.index, name="index"),
+    path('', views.CheckFormView.as_view(), name="index"),
 ]
