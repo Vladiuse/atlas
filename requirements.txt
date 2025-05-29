@@ -8,6 +8,7 @@ django-extensions==4.1
 idna==3.10
 lxml==5.4.0
 mysqlclient==2.2.7
+python-dotenv==1.1.0
 requests==2.32.3
 ruff==0.11.12
 soupsieve==2.7
