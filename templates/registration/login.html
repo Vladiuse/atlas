@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    body {
+        background-color: black;
+        /* position: relative; */
+    }
+
+    #pulp-img {
+        width: 100%;
+    }
+
+    #login-form-wraper {
+        width: 100%;
+        display: flex;
+        height: calc(100vh - 56px);
+        align-items: center;
+    }
+    #login-form-wraper label{
+        color: white;
+    }
+</style>
+
+
+<div id="login-form-wraper">
+    <div class="container">
+        <div class="row">
+            <div class="col-4 d-flex align-items-center">
+                <form method="POST" action="{%url 'login'%}">
+                    {%csrf_token%}
+                    <div class="mb-3">
+                        <label for="exampleInputEmail1" class="form-label">Login</label>
+                        <input name="username" type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleInputPassword1" class="form-label">Password</label>
+                        <input name="password" type="password" class="form-control" id="exampleInputPassword1">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+            <div class="col-8">
+                <img src="{% static 'images/pulp.jpg' %}" alt="pulp" id="pulp-img">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
