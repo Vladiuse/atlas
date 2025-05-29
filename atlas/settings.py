@@ -26,10 +26,8 @@ SECRET_KEY = SECRETS['django-secret-key']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "atlas.vim-store.ru"]
 
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -129,6 +127,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = '/home/v/vladiuse/atlas.vim-store.ru/public_html/static'
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",  # BASE_DIR — это путь к корню проекта
