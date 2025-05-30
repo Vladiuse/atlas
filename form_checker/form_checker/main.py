@@ -32,6 +32,7 @@ class TagChecker:
         selector: str | None = None,
         prefix: str = "",
         root: Optional["TagChecker"] = None,
+        not_exist_error_level: str = ERROR,
     ):
         self._name = name
         self.selector = selector
@@ -39,6 +40,10 @@ class TagChecker:
         self.prefix = prefix
         self._elem = elem
         self.errors = []
+        self.not_exist_error_level = not_exist_error_level
+
+    def get_short_display(self) -> str:
+        return f"<{self.elem.name} {self.elem.attrs}>...</{self.elem.name}>"
 
     @property
     def root(self):
@@ -64,7 +69,7 @@ class TagChecker:
         return self._elem
 
     @elem.setter
-    def elem(self, value):
+    def elem(self, value: Tag) -> Tag | None:
         self._elem = value
 
     @property
@@ -91,9 +96,6 @@ class TagChecker:
                     methods.append(method)
         return methods
 
-    # def check(self):
-    #     pass
-
     def run_checks(self) -> None:
         self.run_methods_checks()
         self.run_nested_checks()
@@ -105,7 +107,7 @@ class TagChecker:
                 error = Error(
                     check_name=f"{self.name}.{nested_checker.__class__.__name__}",
                     message=f"{nested_checker.selector} not found",
-                    level=ERROR,
+                    level=nested_checker.not_exist_error_level,
                     elem='',
                 )
                 self.errors.append(error)
@@ -123,7 +125,7 @@ class TagChecker:
                     check_name=f"{self.name}.{checker.__name__}",
                     message=e.message,
                     level=e.level,
-                    elem=str(self.elem),
+                    elem=self.get_short_display(),
                 )
                 self.errors.append(error)
 
@@ -134,12 +136,89 @@ class PhoneInputChecker(TagChecker):
             raise ValidationError("Incorrect type attr")
 
 
+class NameInput(TagChecker):
+
+    def check_type(self) -> None:
+        if not self._attr_value_eq(attr_name="type", value="text"):
+            raise ValidationError("Incorrect type attr", level=WARNING)
+
+
+class Sub24Input(TagChecker):
+
+    def check_autocomplete(self) -> None:
+        attr_to_check = "autocomplete"
+        value = "given-name"
+        if not self._attr_value_eq(attr_name=attr_to_check, value=value):
+            raise ValidationError(f"Incorrect attr {attr_to_check}")
+
+class Sub25Input(TagChecker):
+
+    def check_autocomplete(self) -> None:
+        attr_to_check = "autocomplete"
+        value = "family-name"
+        if not self._attr_value_eq(attr_name=attr_to_check, value=value):
+            raise ValidationError(f"Incorrect attr {attr_to_check}")
+
+class Sub26Input(TagChecker):
+
+    def check_autocomplete(self) -> None:
+        attr_to_check = "autocomplete"
+        value = "tel-national"
+        if not self._attr_value_eq(attr_name=attr_to_check, value=value):
+            raise ValidationError(f"Incorrect attr {attr_to_check}")
+
+class Sub27Input(TagChecker):
+
+    def check_autocomplete(self) -> None:
+        attr_to_check = "autocomplete"
+        value = "email"
+        if not self._attr_value_eq(attr_name=attr_to_check, value=value):
+            raise ValidationError(f"Incorrect attr {attr_to_check}")
+
+# Необязательно, но желательно:
+# name="sub_id_22" && autocomplete="street-address"
+# name="sub_id_23" && autocomplete="postal-code"
+# name="sub_id_21" && autocomplete="address-level2"
+
+class Sub22Input(TagChecker):
+
+    def check_autocomplete(self) -> None:
+        attr_to_check = "autocomplete"
+        value = "street-address"
+        if not self._attr_value_eq(attr_name=attr_to_check, value=value):
+            raise ValidationError(f"Incorrect attr {attr_to_check}")
+
+class Sub23Input(TagChecker):
+
+    def check_autocomplete(self) -> None:
+        attr_to_check = "autocomplete"
+        value = "postal-code"
+        if not self._attr_value_eq(attr_name=attr_to_check, value=value):
+            raise ValidationError(f"Incorrect attr {attr_to_check}")
+
+
+class Sub21Input(TagChecker):
+    def check_autocomplete(self) -> None:
+        attr_to_check = "autocomplete"
+        value = "address-level2"
+        if not self._attr_value_eq(attr_name=attr_to_check, value=value):
+            raise ValidationError(f"Incorrect attr {attr_to_check}")
+
+
 class FormChecker(TagChecker):
 
     phone_input = PhoneInputChecker(selector='input[name=phone]', name='phone_input')
+    name_input = NameInput(selector='input[name=name]', name='name_input')
+    sub_24 = Sub24Input(selector='input[name=sub_id_24]', name='sub_24')
+    sub_25 = Sub25Input(selector='input[name=sub_id_25]', name='sub_25')
+    sub_26 = Sub26Input(selector='input[name=sub_id_26]', name='sub_26')
+    sub_27 = Sub27Input(selector='input[name=sub_id_27]', name='sub_27')
+    sub_22 = Sub22Input(selector='input[name=sub_id_22]', name='sub_22', not_exist_error_level=WARNING)
+    sub_23 = Sub22Input(selector='input[name=sub_id_23]', name='sub_23', not_exist_error_level=WARNING)
+    sub_21 = Sub22Input(selector='input[name=sub_id_21]', name='sub_21', not_exist_error_level=WARNING)
 
     def check_method(self) -> None:
-        if not self._attr_value_eq("action", "POST", ignore_case=True):
+        if not self._attr_value_eq("method", "POST", ignore_case=True):
             raise ValidationError(message="incorrect action value", level=ERROR)
 
     def check_id(self) -> None:
