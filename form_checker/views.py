@@ -4,7 +4,7 @@ from django.views import View
 from django.shortcuts import render
 from .forms import CheckFormsByUrlForm
 from form_checker.form_checker import HtmlChecker
-from form_checker.form_checker.exceptions import FormNotFound
+from html_checker.exceptions import FormNotFound
 
 html_form_checker = HtmlChecker()
 

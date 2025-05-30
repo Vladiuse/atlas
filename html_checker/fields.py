@@ -64,7 +64,7 @@ class TagChecker:
             return f"{self.root.name}.{name}"
         return name
 
-    def _attr_value_eq(self, attr_name: str, value: str, *, ignore_case: bool = False) -> bool:
+    def attr_value_eq(self, attr_name: str, value: str, *, ignore_case: bool = False) -> bool:
         try:
             attr_value = self.elem[attr_name]
             if ignore_case is True:
@@ -72,6 +72,12 @@ class TagChecker:
             return attr_value == value
         except KeyError:
             return False
+
+    def get_attr_value(self, attr_name: str) -> str | None:
+        try:
+            return self.elem[attr_name]
+        except KeyError:
+            return None
 
     def _get_checks_methods(self) -> list:
         methods = []
