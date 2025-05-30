@@ -2,11 +2,14 @@
 {% load static %}
 {% block content %}
 <style>
-
+#check_form{
+    width: 700px;
+    margin: auto;
+}
 </style>
 
 <div class="container">
-    <form method="post" novalidate>
+    <form method="post" novalidate id="check_form" class="mt-3">
         {% csrf_token %}
         {% if form.non_field_errors %}
         <div class="alert alert-danger">
@@ -14,11 +17,10 @@
         </div>
         {% endif %}
         <div class="mb-3">
-            <label for="{{ form.team.id_for_label }}" class="form-label">Выбор</label>
+            <label for="{{ form.team.id_for_label }}" class="form-label">Команда</label>
             <select name="{{ form.team.name }}" id="{{ form.team.id_for_label }}"
                 class="form-select {% if form.team.errors %}is-invalid{% endif %}">
                 {% for option in form.team.field.choices %}
-                <!-- prettier-ignore -->
                 <option value="{{ option.0 }}">
                     <!-- <option value="{{ option.0 }}" {% if option.0 == form.team.value %} selected {% endif %}> -->
                     {{ option.1 }}
@@ -44,7 +46,7 @@
         </div>
         <div class="mb-3">
             <label for="{{ form.html.id_for_label }}" class="form-label">HTML</label>
-            <textarea type="text" name="{{ form.html.name }}" row="20"
+            <textarea type="text" name="{{ form.html.name }}" rows="16"
                 class="form-control {% if form.html.errors %}is-invalid{% endif %}" id="{{ form.html.id_for_label }}"
                 value=""></textarea>
             {% if form.html.errors %}
