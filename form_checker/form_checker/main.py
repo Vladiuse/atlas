@@ -1,3 +1,4 @@
+from typing import Optional
 from dataclasses import dataclass
 
 from bs4 import BeautifulSoup, Tag
@@ -24,11 +25,47 @@ class ValidationError(Exception):
 
 
 class TagChecker:
-    def __init__(self, elem: Tag, name: str, prefix: str = ""):
+    def __init__(
+        self,
+        name: str,
+        elem: Tag | None = None,
+        selector: str | None = None,
+        prefix: str = "",
+        root: Optional["TagChecker"] = None,
+    ):
         self._name = name
+        self.selector = selector
+        self._root = root
         self.prefix = prefix
-        self.elem = elem
+        self._elem = elem
         self.errors = []
+
+    @property
+    def root(self):
+        return self._root
+
+    @root.setter
+    def root(self, value):
+        self._root = value
+
+    def _get_nested_tags(self) -> list['TagChecker']:
+        tags = []
+        for name in dir(self):
+            checker = getattr(self, name)
+            if name not in ['root', '_root'] and isinstance(checker, TagChecker):
+                checker.root = self
+                elem =  self.elem.select_one(checker.selector)
+                checker.elem =elem
+                tags.append(checker)
+        return tags
+
+    @property
+    def elem(self) -> Tag:
+        return self._elem
+
+    @elem.setter
+    def elem(self, value):
+        self._elem = value
 
     @property
     def name(self) -> str:
@@ -58,6 +95,25 @@ class TagChecker:
     #     pass
 
     def run_checks(self) -> None:
+        self.run_methods_checks()
+        self.run_nested_checks()
+
+    def run_nested_checks(self) -> None:
+        nested_tags = self._get_nested_tags()
+        for nested_checker in nested_tags:
+            if nested_checker.elem is None:
+                error = Error(
+                    check_name=f"{self.name}.{nested_checker.__class__.__name__}",
+                    message=f"{nested_checker.selector} not found",
+                    level=ERROR,
+                    elem='',
+                )
+                self.errors.append(error)
+            else:
+                nested_checker.run_checks()
+                self.errors.extend(nested_checker.errors)
+
+    def run_methods_checks(self) -> None:
         checkers = self._get_checks_methods()
         for checker in checkers:
             try:
@@ -79,6 +135,9 @@ class PhoneInputChecker(TagChecker):
 
 
 class FormChecker(TagChecker):
+
+    phone_input = PhoneInputChecker(selector='input[name=phone]', name='phone_input')
+
     def check_method(self) -> None:
         if not self._attr_value_eq("action", "POST", ignore_case=True):
             raise ValidationError(message="incorrect action value", level=ERROR)
@@ -86,14 +145,6 @@ class FormChecker(TagChecker):
     def check_id(self) -> None:
         if not self._attr_value_eq("id", "mForm"):
             raise ValidationError(message="Incorrect form id", level=ERROR)
-
-    def check_phone_input(self) -> None:
-        phone_input = self.elem.select_one("input[name=phone]")
-        if not phone_input:
-            raise ValidationError(message="Phone input not found")
-        phone_checker = PhoneInputChecker(elem=phone_input, name="phone_input", prefix=self._name)
-        phone_checker.run_checks()
-        self.errors.extend(phone_checker.errors)
 
 
 class HtmlChecker:
