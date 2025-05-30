@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Optional
 
 from bs4 import Tag
@@ -41,10 +42,11 @@ class TagChecker:
         for name in dir(self):
             checker = getattr(self, name)
             if name not in ["root", "_root"] and isinstance(checker, TagChecker):
-                checker.root = self
-                elem = self.elem.select_one(checker.selector)
-                checker.elem = elem
-                tags.append(checker)
+                new_checker = deepcopy(checker)
+                new_checker.root = self
+                elem = self.elem.select_one(new_checker.selector)
+                new_checker.elem = elem
+                tags.append(new_checker)
         return tags
 
     @property

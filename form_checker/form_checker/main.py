@@ -7,7 +7,6 @@ from .atlas import AtlasFormChecker
 
 request_sender = RequestSender()
 def get_checker_by_team(team: str) -> type[AtlasFormChecker]:
-    print(team, 'xxxxx')
     return  {ATLAS_TEAM: AtlasFormChecker}[team]
 
 
@@ -25,7 +24,6 @@ class HtmlChecker:
             form_checker = checker_class(elem=form, name=f"form_{form_number + 1}")
             form_checker.run_checks()
             errors.extend(form_checker.errors)
-        print(len(errors))
         return errors
 
     def _find_forms(self, soup: BeautifulSoup) -> list[Tag]:
