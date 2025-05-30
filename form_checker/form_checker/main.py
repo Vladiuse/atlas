@@ -14,8 +14,6 @@ class HtmlChecker:
     def check(self, html: str, team: str, url: str) -> list[Error]:
         if url != '':
             html = request_sender.request(url=url)
-        with open('req.html', 'w') as file:
-            file.write(html)
         checker_class = get_checker_by_team(team=team)
         errors = []
         soup = BeautifulSoup(html, "lxml")
