@@ -4,6 +4,7 @@ from html_checker.constants import ERROR, WARNING, SUCCESS, INFO
 from html_checker.dto import Error
 from html_checker.exceptions import FormNotFound, ValidationError
 from html_checker.fields import TagChecker
+from rest_framework.serializers import Serializer
 
 
 class PhoneInputChecker(TagChecker):
@@ -92,7 +93,6 @@ class AtlasFormChecker(TagChecker):
     sub_22 = Sub22Input(selector='input[name=sub_id_22]', name='sub_22', not_exist_error_level=WARNING)
     sub_23 = Sub23Input(selector='input[name=sub_id_23]', name='sub_23', not_exist_error_level=WARNING)
     sub_9 = Sub9Input(selector='input[name=sub_id_9]', name='sub_9', not_exist_error_level=INFO)
-
 
 
     def check_id(self) -> None:
