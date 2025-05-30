@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup, Tag
 
-from html_checker.constants import ERROR, WARNING
+from html_checker.constants import ERROR, WARNING, SUCCESS, INFO
 from html_checker.dto import Error
 from html_checker.exceptions import FormNotFound, ValidationError
 from html_checker.fields import TagChecker
@@ -74,35 +74,27 @@ class Sub21Input(TagChecker):
             current_value = self.get_attr_value(attr_name=attr_to_check)
             raise ValidationError(f"Incorrect attr {attr_to_check}, current value: {current_value}")
 
+class Sub9Input(TagChecker):
+    def check_autocomplete(self) -> None:
+        attr_to_check = "autocomplete"
+        value = "address-level1"
+        if not self.attr_value_eq(attr_name=attr_to_check, value=value):
+            current_value = self.get_attr_value(attr_name=attr_to_check)
+            raise ValidationError(f"Incorrect attr {attr_to_check}, current value: {current_value}")
+
 
 class AtlasFormChecker(TagChecker):
     sub_24 = Sub24Input(selector='input[name=sub_id_24]', name='sub_24')
     sub_25 = Sub25Input(selector='input[name=sub_id_25]', name='sub_25')
     sub_26 = Sub26Input(selector='input[name=sub_id_26]', name='sub_26')
     sub_27 = Sub27Input(selector='input[name=sub_id_27]', name='sub_27')
+    sub_21 = Sub21Input(selector='input[name=sub_id_21]', name='sub_21', not_exist_error_level=WARNING)
     sub_22 = Sub22Input(selector='input[name=sub_id_22]', name='sub_22', not_exist_error_level=WARNING)
     sub_23 = Sub23Input(selector='input[name=sub_id_23]', name='sub_23', not_exist_error_level=WARNING)
-    sub_21 = Sub21Input(selector='input[name=sub_id_21]', name='sub_21', not_exist_error_level=WARNING)
+    sub_9 = Sub9Input(selector='input[name=sub_id_9]', name='sub_9', not_exist_error_level=INFO)
+
 
 
     def check_id(self) -> None:
         if not self.attr_value_eq("id", "mForm"):
             raise ValidationError(message="Incorrect form id", level=ERROR)
-
-
-class HtmlChecker:
-    def check(self, html: str) -> list[Error]:
-        errors = []
-        soup = BeautifulSoup(html, "lxml")
-        forms = self._find_forms(soup=soup)
-        for form_number, form in enumerate(forms):
-            form_checker = AtlasFormChecker(elem=form, name=f"form_{form_number + 1}")
-            form_checker.run_checks()
-            errors.extend(form_checker.errors)
-        return errors
-
-    def _find_forms(self, soup: BeautifulSoup) -> list[Tag]:
-        forms = soup.findAll("form")
-        if len(forms) == 0:
-            raise FormNotFound("Не найдена ни одна форма")
-        return forms
