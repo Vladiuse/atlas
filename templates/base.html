@@ -15,7 +15,7 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Atlas</a>
+      <a class="navbar-brand" href="/">Atlas</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -23,7 +23,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="#">Проверить форму</a>
+            <a class="nav-link" href="{%url 'form_checker:check_form_form'%}">Проверить форму</a>
           </li>
         </ul>
         <div>
@@ -52,6 +52,51 @@
   </nav>
   {%block content%}
   {%endblock%}
+  <div class="modal" tabindex="-1" id="logoutModal">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Хотите выйти?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Нет</button>
+          <button type="button" id="logout-btn" class="btn btn-primary">Выйти</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    var csrf = '{{csrf_token}}'
+    var logoutUrl = "{%url 'logout'%}"
+    var headers = {
+      "Content-Type": "application/json",
+      "X-CSRFToken": csrf,
+    }
+    const logoutBtn = document.getElementById('logout-btn')
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function (e) {
+        e.preventDefault()
+        logout()
+      })
+    }
+
+
+    async function logout() {
+      var response = await fetch(logoutUrl, {
+        method: 'POST',
+        headers: headers,
+      })
+      if (response.ok) {
+        window.location.href = '/'
+      } else {
+        alert(await response.text())
+      }
+    }
+  </script>
 </body>
 
 </html>
