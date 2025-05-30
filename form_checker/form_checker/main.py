@@ -74,9 +74,13 @@ class TagChecker:
 
     @property
     def name(self) -> str:
+        name = self._name
         if self.prefix:
-            return f"{self.prefix}_{self._name}"
-        return self._name
+            name = f"{self.prefix}_{self._name}"
+        if self.root:
+            return f"{self.root.name}.{name}"
+        return name
+
 
     def _attr_value_eq(self, attr_name: str, value: str, *, ignore_case: bool = False) -> bool:
         try:
@@ -105,7 +109,7 @@ class TagChecker:
         for nested_checker in nested_tags:
             if nested_checker.elem is None:
                 error = Error(
-                    check_name=f"{self.name}.{nested_checker.__class__.__name__}",
+                    check_name=f"{self.name}:{nested_checker.__class__.__name__}",
                     message=f"{nested_checker.selector} not found",
                     level=nested_checker.not_exist_error_level,
                     elem='',
@@ -122,7 +126,7 @@ class TagChecker:
                 checker()
             except ValidationError as e:
                 error = Error(
-                    check_name=f"{self.name}.{checker.__name__}",
+                    check_name=f"{self.name}:{checker.__name__}",
                     message=e.message,
                     level=e.level,
                     elem=self.get_short_display(),
@@ -175,11 +179,6 @@ class Sub27Input(TagChecker):
         if not self._attr_value_eq(attr_name=attr_to_check, value=value):
             raise ValidationError(f"Incorrect attr {attr_to_check}")
 
-# Необязательно, но желательно:
-# name="sub_id_22" && autocomplete="street-address"
-# name="sub_id_23" && autocomplete="postal-code"
-# name="sub_id_21" && autocomplete="address-level2"
-
 class Sub22Input(TagChecker):
 
     def check_autocomplete(self) -> None:
@@ -209,13 +208,13 @@ class FormChecker(TagChecker):
 
     phone_input = PhoneInputChecker(selector='input[name=phone]', name='phone_input')
     name_input = NameInput(selector='input[name=name]', name='name_input')
-    sub_24 = Sub24Input(selector='input[name=sub_id_24]', name='sub_24')
-    sub_25 = Sub25Input(selector='input[name=sub_id_25]', name='sub_25')
-    sub_26 = Sub26Input(selector='input[name=sub_id_26]', name='sub_26')
-    sub_27 = Sub27Input(selector='input[name=sub_id_27]', name='sub_27')
-    sub_22 = Sub22Input(selector='input[name=sub_id_22]', name='sub_22', not_exist_error_level=WARNING)
-    sub_23 = Sub22Input(selector='input[name=sub_id_23]', name='sub_23', not_exist_error_level=WARNING)
-    sub_21 = Sub22Input(selector='input[name=sub_id_21]', name='sub_21', not_exist_error_level=WARNING)
+    # sub_24 = Sub24Input(selector='input[name=sub_id_24]', name='sub_24')
+    # sub_25 = Sub25Input(selector='input[name=sub_id_25]', name='sub_25')
+    # sub_26 = Sub26Input(selector='input[name=sub_id_26]', name='sub_26')
+    # sub_27 = Sub27Input(selector='input[name=sub_id_27]', name='sub_27')
+    # sub_22 = Sub22Input(selector='input[name=sub_id_22]', name='sub_22', not_exist_error_level=WARNING)
+    # sub_23 = Sub22Input(selector='input[name=sub_id_23]', name='sub_23', not_exist_error_level=WARNING)
+    # sub_21 = Sub22Input(selector='input[name=sub_id_21]', name='sub_21', not_exist_error_level=WARNING)
 
     def check_method(self) -> None:
         if not self._attr_value_eq("method", "POST", ignore_case=True):
