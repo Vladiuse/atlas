@@ -6,21 +6,21 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Префикс</th>
                 <th>Имя</th>
                 <th>Статус</th>
                 <th>Сообщение</th>
                 <th>Иконка</th>
+                <th>Elem</th>
             </tr>
         </thead>
         <tbody>
             {% for result in check_results %}
             <tr class="table-{{result.status}}">
-                <td>{{ result.prefix }}</td>
-                <td>{{ result.name }}</td>
-                <td>{{ result.status|capfirst }}</td>
+                <td>{{ result.check_name }}</td>
+                <td>{{ result.level|capfirst }}</td>
                 <td>{{ result.message }}</td>
-                <td><span class="badge rounded-pill bg-{{result.status}}">{{result.status|capfirst}}</span></td>
+                <td><span class="badge rounded-pill bg-{{result.level}}">{{result.level|capfirst}}</span></td>
+                <td>{{ result.elem }}</td>
             </tr>
             {% endfor %}
         </tbody>

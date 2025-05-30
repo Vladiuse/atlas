@@ -10,32 +10,31 @@ ERROR = "danger"
 
 
 @dataclass
-class CheckResult:
-    name: str
-    status: str
-    message: str = ""
-    prefix: str = ""
+class Error:
+    check_name: str
+    message: str
+    level: str
+    elem: str | None
 
 
-class FormChecker:
-    def __init__(self, elem: Tag, form_number_on_page: int):
-        self.form_number_on_page = form_number_on_page
+@dataclass
+class ValidationError(Exception):
+    message: str
+    level: str = ERROR
+
+
+class TagChecker:
+    def __init__(self, elem: Tag, name: str, prefix: str = ""):
+        self._name = name
+        self.prefix = prefix
         self.elem = elem
+        self.errors = []
 
-    def check(self) -> list[CheckResult]:
-        check_results = []
-        check_funcs_list = [
-            self._check_method,
-            self._check_action,
-            self._check_name_input,
-            self._check_phone_input,
-        ]
-
-        for check_func in check_funcs_list:
-            result = check_func()
-            result.prefix = f'form-{self.form_number_on_page}'
-            check_results.append(result)
-        return check_results
+    @property
+    def name(self) -> str:
+        if self.prefix:
+            return f"{self.prefix}_{self._name}"
+        return self._name
 
     def _attr_value_eq(self, attr_name: str, value: str, *, ignore_case: bool = False) -> bool:
         try:
@@ -46,72 +45,67 @@ class FormChecker:
         except KeyError:
             return False
 
-    def _check_name_input(self) -> CheckResult:
-        name = 'name_input'
-        input_name = self.elem.select_one('input[name="name"]')
-        if input_name:
-            return CheckResult(
-                name=name,
-                status=SUCCESS,
-            )
-        return CheckResult(
-            name=name,
-            status=ERROR,
-            message='Инпут имени не найден',
-        )
+    def _get_checks_methods(self) -> list:
+        methods = []
+        for name in dir(self):
+            if name.startswith("check_"):
+                method = getattr(self, name)
+                if callable(method):
+                    methods.append(method)
+        return methods
 
-    def _check_phone_input(self) -> CheckResult:
-        name = 'phone_input'
-        phone_input = self.elem.select_one('input[name="phone"]')
-        if phone_input:
-            return CheckResult(
-                name=name,
-                status=SUCCESS,
-            )
-        return CheckResult(
-            name=name,
-            status=ERROR,
-            message='Инпут номера телефона не найден',
-        )
+    # def check(self):
+    #     pass
 
-    def _check_method(self) -> CheckResult:
-        check_name = "form_method=POST"
-        if self._attr_value_eq(attr_name="method", value="post", ignore_case=True):
-            return CheckResult(
-                name=check_name,
-                status=SUCCESS,
-            )
-        return CheckResult(
-            name=check_name,
-            status=ERROR,
-            message="Метод формы должен быть POST",
-        )
+    def run_checks(self) -> None:
+        checkers = self._get_checks_methods()
+        for checker in checkers:
+            try:
+                checker()
+            except ValidationError as e:
+                error = Error(
+                    check_name=f"{self.name}.{checker.__name__}",
+                    message=e.message,
+                    level=e.level,
+                    elem=str(self.elem),
+                )
+                self.errors.append(error)
 
-    def _check_action(self) -> CheckResult:
-        check_name = "form_check_action"
-        if self._attr_value_eq(attr_name="action", value="order.php"):
-            return CheckResult(
-                name=check_name,
-                status=SUCCESS,
-            )
-        return CheckResult(
-            name=check_name,
-            status=ERROR,
-            message="Неправильная ссылка на оффер",
-        )
+
+class PhoneInputChecker(TagChecker):
+    def check_type(self) -> None:
+        if not self._attr_value_eq(attr_name="type", value="tel"):
+            raise ValidationError("Incorrect type attr")
+
+
+class FormChecker(TagChecker):
+    def check_method(self) -> None:
+        if not self._attr_value_eq("action", "POST", ignore_case=True):
+            raise ValidationError(message="incorrect action value", level=ERROR)
+
+    def check_id(self) -> None:
+        if not self._attr_value_eq("id", "mForm"):
+            raise ValidationError(message="Incorrect form id", level=ERROR)
+
+    def check_phone_input(self) -> None:
+        phone_input = self.elem.select_one("input[name=phone]")
+        if not phone_input:
+            raise ValidationError(message="Phone input not found")
+        phone_checker = PhoneInputChecker(elem=phone_input, name="phone_input", prefix=self._name)
+        phone_checker.run_checks()
+        self.errors.extend(phone_checker.errors)
 
 
 class HtmlChecker:
-
-    def check(self, html: str) -> list[CheckResult]:
-        result = []
+    def check(self, html: str) -> list[Error]:
+        errors = []
         soup = BeautifulSoup(html, "lxml")
         forms = self._find_forms(soup=soup)
         for form_number, form in enumerate(forms):
-            form_checker = FormChecker(elem=form, form_number_on_page=form_number + 1)
-            check_results = form_checker.check()
-            result.extend(check_results)
-        return result
+            form_checker = FormChecker(elem=form, name=f"form_{form_number + 1}")
+            form_checker.run_checks()
+            errors.extend(form_checker.errors)
+        return errors
 
     def _find_forms(self, soup: BeautifulSoup) -> list[Tag]:
         forms = soup.findAll("form")
