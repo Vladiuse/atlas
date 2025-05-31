@@ -9,7 +9,7 @@ from .exceptions import ValidationError
 
 
 class HtmlTagAttribute:
-    def __init__(
+    def __init__( # noqa: PLR0913
         self,
         name: str | None = None,
         root: Optional["TagChecker"] = None,
@@ -50,7 +50,7 @@ class HtmlTagAttribute:
             return None
         return value.lower() if self.ignore_case else value
 
-    def run_validation(self) -> None:
+    def run_validators(self) -> None:
         if self.required:
             try:
                 self.required_validation()
@@ -111,26 +111,33 @@ class TagChecker:
         self._elem = elem
         self.errors = []
         self.not_exist_error_level = not_exist_error_level
+        self._bind_fields()
 
-        self.bind_fields()
-
-    def bind_fields(self) -> None:
-        if hasattr(self, "attributes_fields") or hasattr(self, "nested_fields"):
+    def _bind_fields(self) -> None:
+        if hasattr(self, "_attributes") or hasattr(self, "_childrens"):
             raise RuntimeError("Fields already bound")
-        self.attributes_fields = {}
-        self.nested_fields = {}
+        self._attributes: dict[str, HtmlTagAttribute] = {}
+        self._childrens: dict[str, TagChecker] = {}
         for name in dir(self.__class__):
             if name.startswith(("__", "_")):
                 continue
             attr = getattr(self.__class__, name)
             if isinstance(attr, HtmlTagAttribute):
                 tag_attribute = deepcopy(attr)
-                self.attributes_fields[name] = tag_attribute
+                self._attributes[name] = tag_attribute
                 setattr(self, name, tag_attribute)
                 tag_attribute.bind(root=self, field_name=name)
             elif isinstance(attr, TagChecker):
-                self.nested_fields[name] = deepcopy(attr)
-                setattr(self, name, self.nested_fields[name])
+                self._childrens[name] = deepcopy(attr)
+                setattr(self, name, self._childrens[name])
+
+    @property
+    def attributes(self) -> dict[str, HtmlTagAttribute]:
+        return self._attributes
+
+    @property
+    def childrens(self) -> dict[str, 'TagChecker']:
+        return self._childrens
 
     def get_short_display(self) -> str:
         return f"<{self.elem.name} {self.elem.attrs}>...</{self.elem.name}>"
@@ -192,18 +199,24 @@ class TagChecker:
         except KeyError:
             return None
 
-    def _get_checks_methods(self) -> list:
-        methods = []
-        for name in dir(self):
-            if name.startswith("check_"):
-                method = getattr(self, name)
-                if callable(method):
-                    methods.append(method)
-        return methods
-
     def run_checks(self) -> None:
         self.run_methods_checks()
         self.run_nested_checks()
+
+    def run_validators(self) -> None:
+        self.run_attributes_validation()
+        self.run_children_validation()
+
+    def run_attributes_validation(self) -> None:
+        for attribute in self.attributes.values():
+            attribute.run_validators()
+
+    def run_children_validation(self) -> None:
+        for children_tag in self.childrens.values():
+            children_tag.run_validators()
+
+    def validate(self):
+        """Hook"""
 
     def run_nested_checks(self) -> None:
         nested_tags = self._get_nested_tags()
@@ -220,16 +233,3 @@ class TagChecker:
                 nested_checker.run_checks()
                 self.errors.extend(nested_checker.errors)
 
-    def run_methods_checks(self) -> None:
-        checkers = self._get_checks_methods()
-        for checker in checkers:
-            try:
-                checker()
-            except ValidationError as e:
-                error = Error(
-                    check_name=f"{self.name}:{checker.__name__}",
-                    message=e.message,
-                    level=e.level,
-                    elem=self.get_short_display(),
-                )
-                self.errors.append(error)
