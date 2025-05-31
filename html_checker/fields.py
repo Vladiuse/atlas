@@ -7,6 +7,17 @@ from .constants import ERROR
 from .dto import Error
 from .exceptions import ValidationError
 
+class HtmlTagAttribute:
+
+    def __init__(self,
+                 name: str = "",
+                 root: Optional["TagChecker"] = None,
+                 required: bool = False,
+                 ):
+        self.name = name
+        self.root = root
+        self.required = required
+
 
 class TagChecker:
     def __init__( # noqa: PLR0913
@@ -25,6 +36,22 @@ class TagChecker:
         self._elem = elem
         self.errors = []
         self.not_exist_error_level = not_exist_error_level
+
+    def bind_fields(self) -> None:
+        if hasattr(self, 'attributes_fields') or hasattr(self, 'nested_fields'):
+            raise RuntimeError("Fields already bound")
+        self.attributes_fields = {}
+        self.nested_fields = {}
+        for name in dir(self.__class__):
+            if name.startswith(("__", "_")):
+                continue
+            attr = getattr(self.__class__, name)
+            if isinstance(attr, HtmlTagAttribute):
+                self.attributes_fields[name] = deepcopy(attr)
+                setattr(self, name, self.attributes_fields[name])
+            elif isinstance(attr, TagChecker):
+                self.nested_fields[name] = deepcopy(attr)
+                setattr(self, name, self.nested_fields[name])
 
     def get_short_display(self) -> str:
         return f"<{self.elem.name} {self.elem.attrs}>...</{self.elem.name}>"
