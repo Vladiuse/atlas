@@ -6,36 +6,96 @@ from bs4 import Tag
 from .constants import ERROR
 from .dto import Error
 from .exceptions import ValidationError
-from .validators import BaseValidator
+
 
 class HtmlTagAttribute:
-
-    def __init__(self,
-                 name: str | None = None,
-                 root: Optional["TagChecker"] = None,
-                 required: bool = False,
-                 validators: list[BaseValidator] | None = None,
-                 ):
+    def __init__(
+        self,
+        name: str | None = None,
+        root: Optional["TagChecker"] = None,
+        required: bool = True,
+        ignore_case: bool = False,
+        expected: str | None = None,
+        choices: list[str] | None = None,
+    ):
         self.name = name
         self.root = root
         self.required = required
-        self.validators =validators
+        self.expected = expected
+        self.choices = choices
+        self.ignore_case = ignore_case
+        self.errors = []
 
-    def bind(self, root: 'TagChecker', field_name: str) -> None:
+        if all([self.expected, self.choices]):
+            raise AttributeError("You cant set both of parameters: expected and choices")
+        if any([self.expected, self.choices]):
+            self.required = True
+
+    def bind(self, root: "TagChecker", field_name: str) -> None:
         self.root = root
         if self.name is None:
             self.name = field_name
 
+    @property
     def value(self) -> str | None:
+        if self.root.elem is None:
+            raise TypeError("Tag element in root cant be None")
         try:
             return self.root.elem[self.name]
         except KeyError:
             return None
 
+    def _normalize(self, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return value.lower() if self.ignore_case else value
+
+    def run_validation(self) -> None:
+        if self.required:
+            try:
+                self.required_validation()
+            except ValidationError as error:
+                self.errors.append(error)
+
+            try:
+                self.expected_validation()
+                self.choices_validation()
+            except ValidationError as error:
+                self.errors.append(error)
+
+        try:
+            self.validate()
+        except ValidationError as error:
+            self.errors.append(error)
+
+    def required_validation(self) -> None:
+        if self.value is None:
+            raise ValidationError(
+                message=f'Attr "{self.name}" is required',
+            )
+
+    def expected_validation(self) -> None:
+        if self.expected is None:
+            return
+        if self._normalize(value=self.value) != self._normalize(value=self.expected):
+            raise ValidationError(
+                message=f'Attr value must be "{self.expected}", actual "{self.value}"',
+            )
+
+    def choices_validation(self) -> None:
+        if self.choices is None:
+            return
+        if self._normalize(value=self.value) not in [self._normalize(value=choice) for choice in self.choices]:
+            raise ValidationError(
+                message=f'Attr value must be on of {self.choices}, actual "{self.value}"',
+            )
+
+    def validate(self) -> None:
+        """Hook"""
 
 
 class TagChecker:
-    def __init__( # noqa: PLR0913
+    def __init__(  # noqa: PLR0913
         self,
         name: str = "",
         elem: Tag | None = None,
@@ -55,7 +115,7 @@ class TagChecker:
         self.bind_fields()
 
     def bind_fields(self) -> None:
-        if hasattr(self, 'attributes_fields') or hasattr(self, 'nested_fields'):
+        if hasattr(self, "attributes_fields") or hasattr(self, "nested_fields"):
             raise RuntimeError("Fields already bound")
         self.attributes_fields = {}
         self.nested_fields = {}
