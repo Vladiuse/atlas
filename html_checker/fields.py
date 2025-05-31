@@ -6,17 +6,32 @@ from bs4 import Tag
 from .constants import ERROR
 from .dto import Error
 from .exceptions import ValidationError
+from .validators import BaseValidator
 
 class HtmlTagAttribute:
 
     def __init__(self,
-                 name: str = "",
+                 name: str | None = None,
                  root: Optional["TagChecker"] = None,
                  required: bool = False,
+                 validators: list[BaseValidator] | None = None,
                  ):
         self.name = name
         self.root = root
         self.required = required
+        self.validators =validators
+
+    def bind(self, root: 'TagChecker', field_name: str) -> None:
+        self.root = root
+        if self.name is None:
+            self.name = field_name
+
+    def value(self) -> str | None:
+        try:
+            return self.root.elem[self.name]
+        except KeyError:
+            return None
+
 
 
 class TagChecker:
@@ -37,6 +52,8 @@ class TagChecker:
         self.errors = []
         self.not_exist_error_level = not_exist_error_level
 
+        self.bind_fields()
+
     def bind_fields(self) -> None:
         if hasattr(self, 'attributes_fields') or hasattr(self, 'nested_fields'):
             raise RuntimeError("Fields already bound")
@@ -47,8 +64,10 @@ class TagChecker:
                 continue
             attr = getattr(self.__class__, name)
             if isinstance(attr, HtmlTagAttribute):
-                self.attributes_fields[name] = deepcopy(attr)
-                setattr(self, name, self.attributes_fields[name])
+                tag_attribute = deepcopy(attr)
+                self.attributes_fields[name] = tag_attribute
+                setattr(self, name, tag_attribute)
+                tag_attribute.bind(root=self, field_name=name)
             elif isinstance(attr, TagChecker):
                 self.nested_fields[name] = deepcopy(attr)
                 setattr(self, name, self.nested_fields[name])
