@@ -9,9 +9,9 @@ from .exceptions import ValidationError
 
 
 class TagChecker:
-    def __init__(
+    def __init__( # noqa: PLR0913
         self,
-        name: str,
+        name: str = "",
         elem: Tag | None = None,
         selector: str | None = None,
         prefix: str = "",
@@ -46,6 +46,7 @@ class TagChecker:
                 new_checker.root = self
                 elem = self.elem.select_one(new_checker.selector)
                 new_checker.elem = elem
+                new_checker.name = name
                 tags.append(new_checker)
         return tags
 
@@ -54,7 +55,7 @@ class TagChecker:
         return self._elem
 
     @elem.setter
-    def elem(self, value: Tag) -> Tag | None:
+    def elem(self, value: Tag) -> None:
         self._elem = value
 
     @property
@@ -65,6 +66,10 @@ class TagChecker:
         if self.root:
             return f"{self.root.name}.{name}"
         return name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value
 
     def attr_value_eq(self, attr_name: str, value: str, *, ignore_case: bool = False) -> bool:
         try:
@@ -99,7 +104,7 @@ class TagChecker:
         for nested_checker in nested_tags:
             if nested_checker.elem is None:
                 error = Error(
-                    check_name=f"{self.name}:{nested_checker.__class__.__name__}",
+                    check_name=f"{self.name}.{nested_checker.__class__.__name__}:elem_exists",
                     message=f"{nested_checker.selector} not found",
                     level=nested_checker.not_exist_error_level,
                     elem="",

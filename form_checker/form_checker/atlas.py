@@ -85,14 +85,14 @@ class Sub9Input(TagChecker):
 
 
 class AtlasFormChecker(TagChecker):
-    sub_24 = Sub24Input(selector='input[name=sub_id_24]', name='sub_24')
-    sub_25 = Sub25Input(selector='input[name=sub_id_25]', name='sub_25')
-    sub_26 = Sub26Input(selector='input[name=sub_id_26]', name='sub_26')
-    sub_27 = Sub27Input(selector='input[name=sub_id_27]', name='sub_27')
-    sub_21 = Sub21Input(selector='input[name=sub_id_21]', name='sub_21', not_exist_error_level=WARNING)
-    sub_22 = Sub22Input(selector='input[name=sub_id_22]', name='sub_22', not_exist_error_level=WARNING)
-    sub_23 = Sub23Input(selector='input[name=sub_id_23]', name='sub_23', not_exist_error_level=WARNING)
-    sub_9 = Sub9Input(selector='input[name=sub_id_9]', name='sub_9', not_exist_error_level=INFO)
+    sub_24 = Sub24Input(selector='input[name=sub_id_24]')
+    sub_25 = Sub25Input(selector='input[name=sub_id_25]')
+    sub_26 = Sub26Input(selector='input[name=sub_id_26]')
+    sub_27 = Sub27Input(selector='input[name=sub_id_27]')
+    sub_21 = Sub21Input(selector='input[name=sub_id_21]', not_exist_error_level=WARNING)
+    sub_22 = Sub22Input(selector='input[name=sub_id_22]', not_exist_error_level=WARNING)
+    sub_23 = Sub23Input(selector='input[name=sub_id_23]', not_exist_error_level=WARNING)
+    sub_9 = Sub9Input(selector='input[name=sub_id_9]', not_exist_error_level=INFO)
 
 
     def check_id(self) -> None:
