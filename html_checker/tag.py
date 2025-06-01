@@ -1,7 +1,7 @@
 import contextlib
 from copy import deepcopy
 from typing import Optional
-
+from .exceptions import ValidationError
 from bs4 import Tag
 
 from .constants import ERROR
@@ -16,6 +16,7 @@ class TagChecker:
         selector: str | None = None,
         elem: Tag | None = None,
         many: bool = False,
+        required: bool = True,
         prefix: str = "",
         root: Optional["TagChecker"] = None,
         not_exist_error_level: str = ERROR,
@@ -27,6 +28,7 @@ class TagChecker:
         self._root = root
         self.prefix = prefix
         self.errors = {}
+        self.required = required
         self.not_exist_error_level = not_exist_error_level
         self._bind_fields()
 
@@ -80,7 +82,16 @@ class TagChecker:
 
 
     def run_validators(self) -> None:
-        if self.elem is not None:  # не запускать валидацию если тэг отсутствует
+        self.fill() # заполняет классы объектами bs4 Tag
+        try:
+            self.required_validation()
+        except ValidationError as error:
+            try:
+                self.errors['non_field_errors'].append(error)
+            except KeyError:
+                self.errors["non_field_errors"] = []
+                self.errors["non_field_errors"].append(error)
+        else: # запускать валидацию атрибутов и вложенных тегов только если текущий тэг найден
             self.run_attributes_validation()
             self.run_children_validation()
 
@@ -100,6 +111,12 @@ class TagChecker:
     def run_children_validation(self) -> None:
         for children_tag in self.childrens.values():
             children_tag.run_validators()
+
+    def required_validation(self) -> None:
+        if self.required and self.elem is None:
+            raise ValidationError(
+                message=f"Tag {self} required"
+            )
 
     def validate(self) -> None:
         """Hook"""
