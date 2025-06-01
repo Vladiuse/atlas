@@ -1,6 +1,6 @@
 import contextlib
 from copy import deepcopy
-from typing import Optional, Callable
+from typing import Callable, Optional
 
 from bs4 import Tag
 
@@ -21,9 +21,10 @@ class TagChecker:
         not_exist_error_level: str = ERROR,
     ):
         self.selector = selector
+        self.field_name = None
         self.elem = elem
         self.many = many
-        self._root = root
+        self.root = root
         self.prefix = prefix
         self.errors = {}
         self.required = required
@@ -40,18 +41,26 @@ class TagChecker:
             attr = getattr(self.__class__, name)
             if isinstance(attr, HtmlTagAttribute):
                 field = deepcopy(attr)
+                self._fields[name] = field
+                setattr(self, name, field)
                 field.bind(root=self, field_name=name)
-                self._fields[name] = field
-                setattr(self, name, field)
             elif isinstance(attr, TagChecker):
-                field = deepcopy(attr)
+                field = ListTagChecker(field=attr) if attr.many else deepcopy(attr)
                 self._fields[name] = field
                 setattr(self, name, field)
+                field.bind(root=self, field_name=name)
+
+    def bind(self, root: "TagChecker", field_name: str) -> None:
+        self.root = root
+        self.field_name = field_name
 
     def fill(self) -> None:
         if self.elem is not None:
             self._fill_attributes()
             self._fill_childrens()
+
+    def find_elem(self) -> None:
+        self.elem = self.root.elem.select_one(self.selector)
 
     def _fill_attributes(self) -> None:
         for attribute_name, attribute in self.attributes.items():
@@ -60,8 +69,9 @@ class TagChecker:
 
     def _fill_childrens(self) -> None:
         for child_name, children in self.childrens.items():
-            elem = self.elem.select_one(children.selector)
-            children.elem = elem
+            # elem = self.elem.select_one(children.selector)
+            # children.elem = elem
+            children.find_elem()
             children.fill()
 
     @property
@@ -75,7 +85,7 @@ class TagChecker:
     def get_short_display(self) -> str:
         if self.elem:
             return f"<{self.elem.name} {self.elem.attrs}>...</{self.elem.name}>"
-        return 'None'
+        return "None"
 
     def run_validators(self) -> None:
         self.fill()  # заполняет классы объектами bs4 Tag
@@ -98,7 +108,7 @@ class TagChecker:
             field.run_validators()
             if len(field.errors) != 0:
                 self.errors[field_name] = field.errors
-            self._run_custom_field_validator(field_name=field_name) # must be called after field.run_validators()
+            self._run_custom_field_validator(field_name=field_name)  # must be called after field.run_validators()
 
     def _get_custom_field_validator(self, field_name: str) -> Callable | None:
         method_field_validation_name = f"validate_{field_name}"
@@ -132,4 +142,42 @@ class TagChecker:
 
 
 class ListTagChecker(TagChecker):
-    pass
+    def __init__(self, field: TagChecker):
+        self.field = field
+        self.root = None
+        self.field_name = None
+        self.items = []
+        self.errors = []
+
+    def bind(self, root: "TagChecker", field_name: str) -> None:
+        self.root = root
+        self.field_name = field_name
+
+    def find_elem(self) -> None:
+        elements =  self.root.elem.select(self.field.selector)
+        for elem in elements:
+            field = deepcopy(self.field)
+            field.bind(root=self.root, field_name=self.field_name)
+            field.elem = elem
+            self.items.append(field)
+
+    def run_validators(self) -> None:
+        try:
+            self._required_validation()
+        except ValidationError as error:
+            self.errors.append(error)
+            return
+        for field in self.items:
+            field.run_validators()
+        for field in self.items:
+            if field.errors:
+                self.errors.append(field.errors)
+
+    def fill(self) -> None:
+        for field in self.items:
+            field.fill()
+
+    def _required_validation(self) -> None:
+        if self.field.required and len(self.items) == 0:
+            raise ValidationError('Must provide at least one item')
+
