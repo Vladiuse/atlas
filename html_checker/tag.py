@@ -10,6 +10,7 @@ from .tag_attribut import HtmlTagAttribute
 
 
 class TagChecker:
+    SELECTOR = None
     def __init__(  # noqa: PLR0913
         self,
         selector: str | None = None,
@@ -20,7 +21,7 @@ class TagChecker:
         root: Optional["TagChecker"] = None,
         not_exist_error_level: str = ERROR,
     ):
-        self.selector = selector
+        self.selector = selector if selector else self.SELECTOR
         self.field_name = None
         self.elem = elem
         self.many = many
@@ -30,6 +31,9 @@ class TagChecker:
         self.required = required
         self.not_exist_error_level = not_exist_error_level
         self._bind_fields()
+
+        if not any([self.elem, self.selector]):
+            raise AttributeError('One of the parameter elem or selector must be set')
 
     def _bind_fields(self) -> None:
         if hasattr(self, "_attributes") or hasattr(self, "_childrens"):
@@ -170,8 +174,7 @@ class ListTagChecker(TagChecker):
         for field in self.items:
             field.run_validators()
         for field in self.items:
-            if field.errors:
-                self.errors.append(field.errors)
+            self.errors.append(field.errors)
 
     def fill(self) -> None:
         for field in self.items:
