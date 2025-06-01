@@ -75,17 +75,18 @@ class TagChecker:
         return {field_name: field for field_name, field in self._fields.items() if isinstance(field, TagChecker)}
 
     def get_short_display(self) -> str:
-        return f"<{self.elem.name} {self.elem.attrs}>...</{self.elem.name}>"
+        if self.elem:
+            return f"<{self.elem.name} {self.elem.attrs}>...</{self.elem.name}>"
+        return 'None'
 
     def run_validators(self) -> None:
         self.fill()  # заполняет классы объектами bs4 Tag
-        self.run_non_fields_validators()
+        self._run_non_fields_validators()
         if self.elem is not None:  # запускать валидацию атрибутов и вложенных тегов только если текущий тэг найден
-            self.run_fields_validation()
-            self.collect_fields_errors()
+            self._run_fields_validation()
 
-    def run_non_fields_validators(self) -> None:
-        non_fields_validators = [self.required_validation, self.validate]
+    def _run_non_fields_validators(self) -> None:
+        non_fields_validators = [self._required_validation, self.validate]
         for validator in non_fields_validators:
             try:
                 validator()
@@ -94,16 +95,13 @@ class TagChecker:
                     self.errors["non_field_errors"] = []
                 self.errors["non_field_errors"].append(error)
 
-    def collect_fields_errors(self) -> None:
+    def _run_fields_validation(self) -> None:
         for field_name, field in self._fields.items():
+            field.run_validators()
             if len(field.errors) != 0:
                 self.errors[field_name] = field.errors
 
-    def run_fields_validation(self) -> None:
-        for field in self._fields.values():
-            field.run_validators()
-
-    def required_validation(self) -> None:
+    def _required_validation(self) -> None:
         if self.required and self.elem is None:
             raise ValidationError(
                 message=f"Tag {self.__class__.__name__} required",
