@@ -1,6 +1,6 @@
 import contextlib
 from copy import deepcopy
-from typing import Optional
+from typing import Optional, Callable
 
 from bs4 import Tag
 
@@ -12,7 +12,6 @@ from .tag_attribut import HtmlTagAttribute
 class TagChecker:
     def __init__(  # noqa: PLR0913
         self,
-        name: str = "",
         selector: str | None = None,
         elem: Tag | None = None,
         many: bool = False,
@@ -21,7 +20,6 @@ class TagChecker:
         root: Optional["TagChecker"] = None,
         not_exist_error_level: str = ERROR,
     ):
-        self._name = name
         self.selector = selector
         self.elem = elem
         self.many = many
@@ -100,6 +98,28 @@ class TagChecker:
             field.run_validators()
             if len(field.errors) != 0:
                 self.errors[field_name] = field.errors
+            self._run_custom_field_validator(field_name=field_name) # must be called after field.run_validators()
+
+    def _get_custom_field_validator(self, field_name: str) -> Callable | None:
+        method_field_validation_name = f"validate_{field_name}"
+        for method_name in dir(self):
+            method = getattr(self, method_name)
+            if callable(method) and method_name == method_field_validation_name:
+                return method
+        return None
+
+    def _run_custom_field_validator(self, field_name: str) -> None:
+        method = self._get_custom_field_validator(field_name=field_name)
+        if method is not None:
+            field = getattr(self, field_name)
+            try:
+                method(field=field)
+            except ValidationError as error:
+                field = getattr(self, field_name)
+                if isinstance(field, TagChecker):
+                    self.errors.setdefault(field_name, {}).setdefault("non_field_errors", []).append(error)
+                elif isinstance(field, HtmlTagAttribute):
+                    self.errors.setdefault(field_name, []).append(error)
 
     def _required_validation(self) -> None:
         if self.required and self.elem is None:
