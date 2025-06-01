@@ -1,11 +1,11 @@
 import contextlib
 from copy import deepcopy
 from typing import Optional
-from .exceptions import ValidationError
+
 from bs4 import Tag
 
 from .constants import ERROR
-from .dto import Error
+from .exceptions import ValidationError
 from .tag_attribut import HtmlTagAttribute
 
 
@@ -44,28 +44,27 @@ class TagChecker:
                 field = deepcopy(attr)
                 field.bind(root=self, field_name=name)
                 self._fields[name] = field
-                setattr(self, name,field)
+                setattr(self, name, field)
             elif isinstance(attr, TagChecker):
                 field = deepcopy(attr)
                 self._fields[name] = field
-                setattr(self, name,field)
+                setattr(self, name, field)
 
     def fill(self) -> None:
-        self._fill_attributes()
-        self._fill_childrens()
+        if self.elem is not None:
+            self._fill_attributes()
+            self._fill_childrens()
 
     def _fill_attributes(self) -> None:
-        if self.elem is not None:
-            for attribute_name, attribute in self.attributes.items():
-                with contextlib.suppress(KeyError):
-                    attribute.value = self.elem[attribute_name]
+        for attribute_name, attribute in self.attributes.items():
+            with contextlib.suppress(KeyError):
+                attribute.value = self.elem[attribute_name]
 
     def _fill_childrens(self) -> None:
-        if self.elem is not None:
-            for child_name, children in self.childrens.items():
-                elem = self.elem.select_one(children.selector)
-                children.elem = elem
-                children.fill()
+        for child_name, children in self.childrens.items():
+            elem = self.elem.select_one(children.selector)
+            children.elem = elem
+            children.fill()
 
     @property
     def attributes(self) -> dict[str, HtmlTagAttribute]:
@@ -78,37 +77,27 @@ class TagChecker:
     def get_short_display(self) -> str:
         return f"<{self.elem.name} {self.elem.attrs}>...</{self.elem.name}>"
 
-
     def run_validators(self) -> None:
-        self.fill() # заполняет классы объектами bs4 Tag
-        try:
-            self.required_validation()
-        except ValidationError as error:
-            try:
-                self.errors['non_field_errors'].append(error)
-            except KeyError:
-                self.errors["non_field_errors"] = []
-                self.errors["non_field_errors"].append(error)
-
+        self.fill()  # заполняет классы объектами bs4 Tag
+        self.run_non_fields_validators()
         if self.elem is not None:  # запускать валидацию атрибутов и вложенных тегов только если текущий тэг найден
             self.run_fields_validation()
             self.collect_fields_errors()
 
-        try:
-            self.validate()
-        except ValidationError as error:
+    def run_non_fields_validators(self) -> None:
+        non_fields_validators = [self.required_validation, self.validate]
+        for validator in non_fields_validators:
             try:
-                self.errors["non_field_errors"].append(error)
-            except KeyError:
-                self.errors["non_field_errors"] = []
+                validator()
+            except ValidationError as error:
+                if self.errors.get("non_field_errors") is None:
+                    self.errors["non_field_errors"] = []
                 self.errors["non_field_errors"].append(error)
 
     def collect_fields_errors(self) -> None:
         for field_name, field in self._fields.items():
             if len(field.errors) != 0:
-                if self.errors.get(field_name) is None:
-                    self.errors[field_name] = []
-                self.errors[field_name].extend(field.errors)
+                self.errors[field_name] = field.errors
 
     def run_fields_validation(self) -> None:
         for field in self._fields.values():
@@ -122,6 +111,7 @@ class TagChecker:
 
     def validate(self) -> None:
         """Hook"""
+
 
 class ListTagChecker(TagChecker):
     pass
