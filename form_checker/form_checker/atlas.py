@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup, Tag
 from html_checker.constants import ERROR, WARNING, SUCCESS, INFO
 from html_checker.dto import Error
 from html_checker.exceptions import FormNotFound, ValidationError
-from html_checker.fields import TagChecker
+from html_checker.tag import TagChecker
 from rest_framework.serializers import Serializer
 
 

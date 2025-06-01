@@ -5,93 +5,7 @@ from bs4 import Tag
 
 from .constants import ERROR
 from .dto import Error
-from .exceptions import ValidationError
-
-
-class HtmlTagAttribute:
-    def __init__( # noqa: PLR0913
-        self,
-        name: str | None = None,
-        root: Optional["TagChecker"] = None,
-        required: bool = True,
-        ignore_case: bool = False,
-        expected: str | None = None,
-        choices: list[str] | None = None,
-    ):
-        self.name = name
-        self.root = root
-        self.required = required
-        self.expected = expected
-        self.choices = choices
-        self.ignore_case = ignore_case
-        self.errors = []
-
-        if all([self.expected, self.choices]):
-            raise AttributeError("You cant set both of parameters: expected and choices")
-        if any([self.expected, self.choices]):
-            self.required = True
-
-    def bind(self, root: "TagChecker", field_name: str) -> None:
-        self.root = root
-        if self.name is None:
-            self.name = field_name
-
-    @property
-    def value(self) -> str | None:
-        if self.root.elem is None:
-            raise TypeError("Tag element in root cant be None")
-        try:
-            return self.root.elem[self.name]
-        except KeyError:
-            return None
-
-    def _normalize(self, value: str | None) -> str | None:
-        if value is None:
-            return None
-        return value.lower() if self.ignore_case else value
-
-    def run_validators(self) -> None:
-        if self.required:
-            try:
-                self.required_validation()
-            except ValidationError as error:
-                self.errors.append(error)
-            else:
-                # check only if attribute exist
-                try:
-                    self.expected_validation()
-                    self.choices_validation()
-                except ValidationError as error:
-                    self.errors.append(error)
-        try:
-            self.validate()
-        except ValidationError as error:
-            self.errors.append(error)
-
-    def required_validation(self) -> None:
-        if self.value is None:
-            raise ValidationError(
-                message=f'Attr "{self.name}" is required',
-            )
-
-    def expected_validation(self) -> None:
-        if self.expected is None:
-            return
-        if self._normalize(value=self.value) != self._normalize(value=self.expected):
-            raise ValidationError(
-                message=f'Attr value must be "{self.expected}", actual "{self.value}"',
-            )
-
-    def choices_validation(self) -> None:
-        if self.choices is None:
-            return
-        if self._normalize(value=self.value) not in [self._normalize(value=choice) for choice in self.choices]:
-            raise ValidationError(
-                message=f'Attr value must be on of {self.choices}, actual "{self.value}"',
-            )
-
-    def validate(self) -> None:
-        """Hook"""
+from .tag_attribut import HtmlTagAttribute
 
 
 class TagChecker:
@@ -119,7 +33,7 @@ class TagChecker:
         self._attributes: dict[str, HtmlTagAttribute] = {}
         self._childrens: dict[str, TagChecker] = {}
         for name in dir(self.__class__):
-            if name.startswith(("__", "_")):
+            if name.startswith(("__", "_")) and name != "_class":
                 continue
             attr = getattr(self.__class__, name)
             if isinstance(attr, HtmlTagAttribute):
@@ -136,7 +50,7 @@ class TagChecker:
         return self._attributes
 
     @property
-    def childrens(self) -> dict[str, 'TagChecker']:
+    def childrens(self) -> dict[str, "TagChecker"]:
         return self._childrens
 
     def get_short_display(self) -> str:
@@ -200,7 +114,6 @@ class TagChecker:
             return None
 
     def run_checks(self) -> None:
-        self.run_methods_checks()
         self.run_nested_checks()
 
     def run_validators(self) -> None:
@@ -215,7 +128,7 @@ class TagChecker:
         for children_tag in self.childrens.values():
             children_tag.run_validators()
 
-    def validate(self):
+    def validate(self) -> None:
         """Hook"""
 
     def run_nested_checks(self) -> None:
@@ -232,4 +145,3 @@ class TagChecker:
             else:
                 nested_checker.run_checks()
                 self.errors.extend(nested_checker.errors)
-
