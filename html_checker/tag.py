@@ -35,22 +35,20 @@ class TagChecker:
     def _bind_fields(self) -> None:
         if hasattr(self, "_attributes") or hasattr(self, "_childrens"):
             raise RuntimeError("Fields already bound")
-        self._attributes: dict[str, HtmlTagAttribute] = {}
-        self._childrens: dict[str, TagChecker] = {}
+        self._fields: dict[str, HtmlTagAttribute | TagChecker] = {}
         for name in dir(self.__class__):
             if name.startswith(("__", "_")) and name != "_class":
                 continue
             attr = getattr(self.__class__, name)
             if isinstance(attr, HtmlTagAttribute):
-                tag_attribute = deepcopy(attr)
-
-                self._attributes[name] = tag_attribute
-                setattr(self, name, tag_attribute)
-                tag_attribute.bind(root=self, field_name=name)
+                field = deepcopy(attr)
+                field.bind(root=self, field_name=name)
+                self._fields[name] = field
+                setattr(self, name,field)
             elif isinstance(attr, TagChecker):
-                nested_tag = deepcopy(attr)
-                self._childrens[name] = nested_tag
-                setattr(self, name, self._childrens[name])
+                field = deepcopy(attr)
+                self._fields[name] = field
+                setattr(self, name,field)
 
     def fill(self) -> None:
         self._fill_attributes()
@@ -71,11 +69,11 @@ class TagChecker:
 
     @property
     def attributes(self) -> dict[str, HtmlTagAttribute]:
-        return self._attributes
+        return {field_name: field for field_name, field in self._fields.items() if isinstance(field, HtmlTagAttribute)}
 
     @property
     def childrens(self) -> dict[str, "TagChecker"]:
-        return self._childrens
+        return {field_name: field for field_name, field in self._fields.items() if isinstance(field, TagChecker)}
 
     def get_short_display(self) -> str:
         return f"<{self.elem.name} {self.elem.attrs}>...</{self.elem.name}>"
@@ -91,31 +89,35 @@ class TagChecker:
             except KeyError:
                 self.errors["non_field_errors"] = []
                 self.errors["non_field_errors"].append(error)
-        else: # запускать валидацию атрибутов и вложенных тегов только если текущий тэг найден
-            self.run_attributes_validation()
-            self.run_children_validation()
 
-            self.collect_attributes_errors()
+        if self.elem is not None:  # запускать валидацию атрибутов и вложенных тегов только если текущий тэг найден
+            self.run_fields_validation()
+            self.collect_fields_errors()
 
-    def collect_attributes_errors(self) -> None:
-        for attribute_name, attribute in self.attributes.items():
-            if len(attribute.errors) != 0:
-                if self.errors.get(attribute_name) is None:
-                    self.errors[attribute_name] = []
-                self.errors[attribute_name].extend(attribute.errors)
+        try:
+            self.validate()
+        except ValidationError as error:
+            try:
+                self.errors["non_field_errors"].append(error)
+            except KeyError:
+                self.errors["non_field_errors"] = []
+                self.errors["non_field_errors"].append(error)
 
-    def run_attributes_validation(self) -> None:
-        for attribute_name, attribute in self.attributes.items():
-            attribute.run_validators()
+    def collect_fields_errors(self) -> None:
+        for field_name, field in self._fields.items():
+            if len(field.errors) != 0:
+                if self.errors.get(field_name) is None:
+                    self.errors[field_name] = []
+                self.errors[field_name].extend(field.errors)
 
-    def run_children_validation(self) -> None:
-        for children_tag in self.childrens.values():
-            children_tag.run_validators()
+    def run_fields_validation(self) -> None:
+        for field in self._fields.values():
+            field.run_validators()
 
     def required_validation(self) -> None:
         if self.required and self.elem is None:
             raise ValidationError(
-                message=f"Tag {self} required"
+                message=f"Tag {self.__class__.__name__} required",
             )
 
     def validate(self) -> None:

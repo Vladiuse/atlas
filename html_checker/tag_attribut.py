@@ -45,7 +45,6 @@ class HtmlTagAttribute:
                 self.required_validation()
             except ValidationError as error:
                 self.errors.append(error)
-                print('Raise required', self, self.root.elem)
             else:
                 # check only if attribute exist
                 try:
