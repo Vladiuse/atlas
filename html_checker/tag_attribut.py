@@ -8,6 +8,7 @@ class HtmlTagAttribute:
         self,
         name: str | None = None,
         root: Optional["TagChecker"] = None,  # noqa: F821
+        value: str | None = None,
         required: bool = True,
         ignore_case: bool = False,
         expected: str | None = None,
@@ -16,6 +17,7 @@ class HtmlTagAttribute:
         self.name = name
         self.root = root
         self.required = required
+        self.value = value
         self.expected = expected
         self.choices = choices
         self.ignore_case = ignore_case
@@ -31,14 +33,6 @@ class HtmlTagAttribute:
         if self.name is None:
             self.name = field_name
 
-    @property
-    def value(self) -> str | None:
-        if self.root.elem is None:
-            raise TypeError("Tag element in root cant be None")
-        try:
-            return self.root.elem[self.name]
-        except KeyError:
-            return None
 
     def _normalize(self, value: str | None) -> str | None:
         if value is None:
@@ -46,12 +40,12 @@ class HtmlTagAttribute:
         return value.lower() if self.ignore_case else value
 
     def run_validators(self) -> None:
-        print('run_validators', self.__class__)
         if self.required:
             try:
                 self.required_validation()
             except ValidationError as error:
                 self.errors.append(error)
+                print('Raise required', self, self.root.elem)
             else:
                 # check only if attribute exist
                 try:

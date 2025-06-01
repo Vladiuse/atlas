@@ -1,3 +1,4 @@
+import contextlib
 from copy import deepcopy
 from typing import Optional
 
@@ -40,15 +41,31 @@ class TagChecker:
             attr = getattr(self.__class__, name)
             if isinstance(attr, HtmlTagAttribute):
                 tag_attribute = deepcopy(attr)
+
                 self._attributes[name] = tag_attribute
                 setattr(self, name, tag_attribute)
                 tag_attribute.bind(root=self, field_name=name)
             elif isinstance(attr, TagChecker):
                 nested_tag = deepcopy(attr)
-                nested_tag_elem = self.elem.select_one(nested_tag.selector)
-                nested_tag.elem = nested_tag_elem
                 self._childrens[name] = nested_tag
                 setattr(self, name, self._childrens[name])
+
+    def fill(self) -> None:
+        self._fill_attributes()
+        self._fill_childrens()
+
+    def _fill_attributes(self) -> None:
+        if self.elem is not None:
+            for attribute_name, attribute in self.attributes.items():
+                with contextlib.suppress(KeyError):
+                    attribute.value = self.elem[attribute_name]
+
+    def _fill_childrens(self) -> None:
+        if self.elem is not None:
+            for child_name, children in self.childrens.items():
+                elem = self.elem.select_one(children.selector)
+                children.elem = elem
+                children.fill()
 
     @property
     def attributes(self) -> dict[str, HtmlTagAttribute]:
@@ -63,16 +80,18 @@ class TagChecker:
 
 
     def run_validators(self) -> None:
-        self.run_attributes_validation()
-        self.run_children_validation()
+        if self.elem is not None:  # не запускать валидацию если тэг отсутствует
+            self.run_attributes_validation()
+            self.run_children_validation()
 
-        self.collect_attributes_errors()
+            self.collect_attributes_errors()
 
     def collect_attributes_errors(self) -> None:
         for attribute_name, attribute in self.attributes.items():
-            if self.errors.get(attribute_name) is None:
-                self.errors[attribute_name] = []
-            self.errors[attribute_name].extend(attribute.errors)
+            if len(attribute.errors) != 0:
+                if self.errors.get(attribute_name) is None:
+                    self.errors[attribute_name] = []
+                self.errors[attribute_name].extend(attribute.errors)
 
     def run_attributes_validation(self) -> None:
         for attribute_name, attribute in self.attributes.items():
