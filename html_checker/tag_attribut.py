@@ -46,6 +46,7 @@ class HtmlTagAttribute:
         return value.lower() if self.ignore_case else value
 
     def run_validators(self) -> None:
+        print('run_validators', self.__class__)
         if self.required:
             try:
                 self.required_validation()
