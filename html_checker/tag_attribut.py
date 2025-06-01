@@ -45,13 +45,13 @@ class HtmlTagAttribute:
                 self.required_validation()
             except ValidationError as error:
                 self.errors.append(error)
-            else:
-                # check only if attribute exist
-                try:
-                    self.expected_validation()
-                    self.choices_validation()
-                except ValidationError as error:
-                    self.errors.append(error)
+
+        if self.value is not None:
+            try:
+                self.expected_validation()
+                self.choices_validation()
+            except ValidationError as error:
+                self.errors.append(error)
         try:
             self.validate()
         except ValidationError as error:
