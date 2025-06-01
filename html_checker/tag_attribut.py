@@ -28,6 +28,9 @@ class HtmlTagAttribute:
         if any([self.expected, self.choices]):
             self.required = True
 
+    def __str__(self):
+        return f'{self.name}="{self.value}"'
+
     def bind(self, root: "TagChecker", field_name: str) -> None:  # noqa: F821
         self.root = root
         if self.name is None:
