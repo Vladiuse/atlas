@@ -16,7 +16,7 @@
 
         {%if tag_data.errors.non_field_errors%}
         {%for error in tag_data.errors.non_field_errors%}
-        <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}">{{error.message}}</p>
+        <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}"><span>{{error.message}}</span></p>
         {%endfor%}
         {%else%}
         <p class="error-message error-message-success text-success"></p>
@@ -59,7 +59,7 @@
         <td class="error-cell" >
           {%if attr_data.errors%}
           {%for error in attr_data.errors%}
-          <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}">{{error.message}}</p>
+          <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}"><span>{{error.message}}</span></p>
           {%endfor%}
           {%else%}
           <p class="error-message error-message-success text-success"></p>
