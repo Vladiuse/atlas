@@ -138,9 +138,7 @@ class TagChecker:
             try:
                 validator()
             except ValidationError as error:
-                if self.errors.get("non_field_errors") is None:
-                    self.errors["non_field_errors"] = []
-                self.errors["non_field_errors"].append(error)
+                self.errors.setdefault("non_field_errors", []).append(error)
 
     def _run_fields_validation(self) -> None:
         for field_name, field in self._fields.items():
