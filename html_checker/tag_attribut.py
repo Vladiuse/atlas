@@ -1,7 +1,7 @@
 from typing import Optional
 
+from .constants import SUCCESS, ErrorLevel
 from .exceptions import ValidationError
-from .constants import ErrorLevel, SUCCESS
 
 
 class HtmlTagAttribute:
@@ -35,16 +35,14 @@ class HtmlTagAttribute:
     @property
     def error_level(self) -> ErrorLevel:
         if self.errors:
-            max_level_error =  max(self.errors, key=lambda validation_error: validation_error.level)
+            max_level_error = max(self.errors, key=lambda validation_error: validation_error.level)
             return max_level_error.level
         return SUCCESS
-
 
     def bind(self, root: "TagChecker", field_name: str) -> None:  # noqa: F821
         self.root = root
         if self.name is None:
             self.name = field_name
-
 
     def _normalize(self, value: str | None) -> str | None:
         if value is None:
@@ -94,6 +92,7 @@ class HtmlTagAttribute:
     def validate(self) -> None:
         """Hook"""
 
+
 HTTP_METHODS = [
     "GET",
     "POST",
@@ -105,6 +104,7 @@ HTTP_METHODS = [
     "TRACE",
     "CONNECT",
 ]
+
 
 class FormMethod(HtmlTagAttribute):
     def __init__(self, *args, **kwargs):  # noqa: ANN002, ANN003

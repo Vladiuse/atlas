@@ -1,18 +1,20 @@
-from collections import OrderedDict
 import contextlib
+from collections import OrderedDict
 from copy import deepcopy
 from typing import Callable, Optional
 
 from bs4 import Tag
 
-from .constants import ERROR, ErrorLevel, SUCCESS
+from .constants import ERROR, SUCCESS, ErrorLevel
 from .exceptions import ValidationError
 from .tag_attribut import HtmlTagAttribute
 
 NON_FIELD_ERROR = "non_field_errors"
 
+
 class TagChecker:
     SELECTOR = None
+
     def __init__(  # noqa: PLR0913
         self,
         selector: str | None = None,
@@ -37,7 +39,7 @@ class TagChecker:
         self._bind_fields()
 
         if not any([self.elem, self.selector]):
-            raise AttributeError('One of the parameter elem or selector must be set')
+            raise AttributeError("One of the parameter elem or selector must be set")
 
     def _bind_fields(self) -> None:
         if hasattr(self, "_fields"):
@@ -110,7 +112,7 @@ class TagChecker:
         name = self.selector if self.selector else self.tag_name
         if self.elem_number:
             name = f"{name}-{self.elem_number}"
-        if self.root and self.root.name != 'html':
+        if self.root and self.root.name != "html":
             name = f"{self.root.name} > {name}"
         return name
 
@@ -125,7 +127,7 @@ class TagChecker:
             max_attribute_error_level = max(attributes_levels)
         # get non_fields (self) level errors
         if self.errors.get(NON_FIELD_ERROR):
-            max_level_error =  max(self.errors[NON_FIELD_ERROR], key=lambda validation_error: validation_error.level)
+            max_level_error = max(self.errors[NON_FIELD_ERROR], key=lambda validation_error: validation_error.level)
             self_error_level = max_level_error.level
             return max(self_error_level, max_attribute_error_level)
         return max_attribute_error_level
@@ -170,14 +172,14 @@ class TagChecker:
             except ValidationError as error:
                 field = getattr(self, field_name)
                 if isinstance(field, TagChecker):
-                     if field.many is False:
+                    if field.many is False:
                         field.errors.setdefault(NON_FIELD_ERROR, []).append(error)
-                     else:
-                         self.errors.setdefault(NON_FIELD_ERROR, []).append(error)
+                    else:
+                        self.errors.setdefault(NON_FIELD_ERROR, []).append(error)
                 elif isinstance(field, HtmlTagAttribute):
-                     field.errors.append(error)
+                    field.errors.append(error)
                 else:
-                    raise TypeError(f'Unknown class type of field {type(field)}')
+                    raise TypeError(f"Unknown class type of field {type(field)}")
 
     def _required_validation(self) -> None:
         if self.required and self.elem is None:
@@ -203,7 +205,7 @@ class ListTagChecker(TagChecker):
         self.field_name = field_name
 
     def find_elem(self) -> None:
-        elements =  self.root.elem.select(self.field.selector)
+        elements = self.root.elem.select(self.field.selector)
         for elem_number, elem in enumerate(elements):
             field = deepcopy(self.field)
             field.bind(root=self.root, field_name=self.field_name)
@@ -228,8 +230,7 @@ class ListTagChecker(TagChecker):
 
     def _required_validation(self) -> None:
         if self.field.required and len(self.items) == 0:
-            raise ValidationError('Must provide at least one item')
+            raise ValidationError("Must provide at least one item")
 
     def is_list_tag(self) -> bool:
         return True
-
