@@ -166,7 +166,8 @@ class TagChecker:
             except ValidationError as error:
                 field = getattr(self, field_name)
                 if isinstance(field, TagChecker):
-                    self.errors.setdefault(field_name, {}).setdefault("non_field_errors", []).append(error)
+                    # self.errors.setdefault(field_name, {}).setdefault("non_field_errors", []).append(error)  # maybe will need later
+                    field.errors.setdefault("non_field_errors", []).append(error)
                 elif isinstance(field, HtmlTagAttribute):
                     self.errors.setdefault(field_name, []).append(error)
 
