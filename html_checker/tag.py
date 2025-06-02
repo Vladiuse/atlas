@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import contextlib
 from copy import deepcopy
 from typing import Callable, Optional
@@ -27,7 +28,7 @@ class TagChecker:
         self.many = many
         self.root = root
         self.prefix = prefix
-        self.errors = {}
+        self.errors = OrderedDict()
         self.required = required
         self.not_exist_error_level = not_exist_error_level
         self._bind_fields()
@@ -89,7 +90,15 @@ class TagChecker:
     def get_short_display(self) -> str:
         if self.elem:
             return f"<{self.elem.name} {self.elem.attrs}>...</{self.elem.name}>"
-        return "None"
+        return ""
+
+    @property
+    def tag_name(self) -> str | None:
+        return self.elem.name if self.elem else None
+
+    @property
+    def name(self) -> str:
+        return self.tag_name if self.tag_name else self.selector
 
     def run_validators(self) -> None:
         self.fill()  # заполняет классы объектами bs4 Tag
