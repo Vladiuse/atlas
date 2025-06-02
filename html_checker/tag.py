@@ -81,6 +81,12 @@ class TagChecker:
             children.find_elem()
             children.fill()
 
+    def exist(self) -> bool:
+        return bool(self.elem)
+
+    def is_list_tag(self) -> bool:
+        return False
+
     @property
     def attributes(self) -> dict[str, HtmlTagAttribute]:
         return {field_name: field for field_name, field in self._fields.items() if isinstance(field, HtmlTagAttribute)}
@@ -196,4 +202,7 @@ class ListTagChecker(TagChecker):
     def _required_validation(self) -> None:
         if self.field.required and len(self.items) == 0:
             raise ValidationError('Must provide at least one item')
+
+    def is_list_tag(self) -> bool:
+        return True
 

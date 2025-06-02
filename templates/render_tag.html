@@ -1,5 +1,5 @@
 <details open>
-  <summary>{{tag_data.name}}</summary>
+  <summary>{{tag_data.selector}}</summary>
   <div class="row my-3">
     <div class="col">
       <p class="text-center">
@@ -14,37 +14,33 @@
       <p>
         {%if tag_data.errors.non_field_errors%}
         {%for error in tag_data.errors.non_field_errors%}
-        <span class="text-{{error.level}}">{{error.message}}</span>
+        <span class="text-{{error.level}}">❌ <b>FAILED</b>: {{error.message}}</span>
         {%endfor%}
         {%else%}
-        -
+        <span class="text-success">✅ <b>PASSED</b></span>
         {%endif%}
       </p>
     </div>
   </div>
   {%if tag_data.exist%}
   <!-- TAG ATTRIBUTES TABLE -->
-  <table class="table">
+   
+
+   <table class="table">
     <thead>
       <tr>
-        <th scope="col" colspan="4" class="text-center">Attributes</th>
-      </tr>
-    </thead>
-    <!-- <thead>
-      <tr>
-        <th scope="col">Attr Name</th>
+        <th scope="col">Attr</th>
         <th scope="col">Value</th>
         <th scope="col">Expected</th>
-        <th scope="col">Errors</th>
-      </tr> -->
+        <th scope="col" >Errors</th>
+      </tr>
     </thead>
     <tbody>
-      {%for attr_name, attr_data in tag_data.attrs.items%}
+      {%for attr_name, attr_data in tag_data.attributes.items%}
       <tr>
-        <td>{{attr_data.name}}</td>
-        <td>{{attr_data.value}}</td>
+        <td><b>{{attr_data.name}}</b></td>
+        <td>"{{attr_data.value}}"</td>
         <td>
-
           {%if attr_data.expected%}
           "{{attr_data.expected}}"
           {%endif%}
@@ -52,13 +48,13 @@
           {{attr_data.choices}}
           {%endif%}
         </td>
-        <td class="error-cell" style="width: 50%;">
+        <td class="error-cell" >
           {%if attr_data.errors%}
           {%for error in attr_data.errors%}
-          <span class="text-{{error.level}}">{{error.message}}</span>
+          <span class="text-{{error.level}}">❌ <b>FAILED</b>: {{error.message}}</span>
           {%endfor%}
           {%else%}
-          -
+          <span class="text-success">✅ <b>PASSED</b></span>
           {%endif%}
         </td>
       </tr>
@@ -69,18 +65,20 @@
   {%endif%}
 
   <!-- TAG CHILDRENS -->
-  {% if tag_data.children %}
-  {% for child_key, child_value in tag_data.children.items %}
-  {% if child_value.0 %}
+  {% if tag_data.childrens %}
+
+  {% for child_key, child_tag in tag_data.childrens.items %}
+  {% if child_tag.is_list_tag %}
   {# Это список тегов #}
-  {% for child_data in child_value %}
+  {% for child_data in child_tag.items %}
   {% include "render_tag.html" with tag_data=child_data %}
   {% endfor %}
   {% else %}
   {# Это один тег #}
-  {% include "render_tag.html" with tag_data=child_value %}
+  {% include "render_tag.html" with tag_data=child_tag %}
   {% endif %}
   {% endfor %}
+
   {% endif %}
   <!-- TAG CHILDRENS -->
 </details>
