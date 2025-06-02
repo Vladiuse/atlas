@@ -145,9 +145,11 @@ class TagChecker:
     def _run_fields_validation(self) -> None:
         for field_name, field in self._fields.items():
             field.run_validators()
+            # run validation from methods validate_<field_name>
+            self._run_custom_field_validator(field_name=field_name)  # must be called after field.run_validators()
+            # collect field errors
             if len(field.errors) != 0:
                 self.errors[field_name] = field.errors
-            self._run_custom_field_validator(field_name=field_name)  # must be called after field.run_validators()
 
     def _get_custom_field_validator(self, field_name: str) -> Callable | None:
         method_field_validation_name = f"validate_{field_name}"
@@ -166,10 +168,13 @@ class TagChecker:
             except ValidationError as error:
                 field = getattr(self, field_name)
                 if isinstance(field, TagChecker):
-                    # self.errors.setdefault(field_name, {}).setdefault("non_field_errors", []).append(error)  # maybe will need later
-                    field.errors.setdefault("non_field_errors", []).append(error)
+                    #self.errors.setdefault(field_name, {}).setdefault("non_field_errors", []).append(error)  # maybe will need later
+                     field.errors.setdefault("non_field_errors", []).append(error)
                 elif isinstance(field, HtmlTagAttribute):
-                    self.errors.setdefault(field_name, []).append(error)
+                    #self.errors.setdefault(field_name, []).append(error)
+                     field.errors.append(error)
+                else:
+                    raise TypeError(f'Unknown class type of field {type(field)}')
 
     def _required_validation(self) -> None:
         if self.required and self.elem is None:
