@@ -21,6 +21,7 @@ class TagChecker:
         prefix: str = "",
         root: Optional["TagChecker"] = None,
         not_exist_error_level: str = ERROR,
+        elem_number: int | None = None,
     ):
         self.selector = selector if selector else self.SELECTOR
         self.field_name = None
@@ -31,6 +32,7 @@ class TagChecker:
         self.errors = OrderedDict()
         self.required = required
         self.not_exist_error_level = not_exist_error_level
+        self.elem_number = elem_number
         self._bind_fields()
 
         if not any([self.elem, self.selector]):
@@ -98,7 +100,8 @@ class TagChecker:
 
     @property
     def name(self) -> str:
-        return self.tag_name if self.tag_name else self.selector
+        name = self.tag_name if self.tag_name else self.selector
+        return f"{name}-{self.elem_number}" if self.elem_number else name
 
     def run_validators(self) -> None:
         self.fill()  # заполняет классы объектами bs4 Tag
@@ -168,10 +171,11 @@ class ListTagChecker(TagChecker):
 
     def find_elem(self) -> None:
         elements =  self.root.elem.select(self.field.selector)
-        for elem in elements:
+        for elem_number, elem in enumerate(elements):
             field = deepcopy(self.field)
             field.bind(root=self.root, field_name=self.field_name)
             field.elem = elem
+            field.elem_number = elem_number + 1
             self.items.append(field)
 
     def run_validators(self) -> None:
