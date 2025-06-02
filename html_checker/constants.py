@@ -18,6 +18,9 @@ class ErrorLevel:
     def __eq__(self, other):
         return int(self) == int(other)
 
+    def __hash__(self):
+        return hash(self.level)
+
     def __repr__(self):
         return f"ErrorLevel(level='{self.level}')"
 
