@@ -14,45 +14,100 @@
     margin-top: 0;
     margin-bottom: 0;
   }
-  .row{
+
+  .row {
     background-color: #EEE;
     margin-left: 0;
     margin-right: 0;
   }
-  .col{
-    padding: 0.5rem;
+
+  .col {
+    /* padding: 0.5rem; */
+    padding-left: 1.5rem;
   }
-  table th{
+
+  table th {
     font-weight: 400;
     text-transform: lowercase;
   }
 
-  table tr{
+  table tr {
     display: flex;
   }
 
-  table th, table td{
+  table th,
+  table td {
     flex: 1;
   }
+
   table th:last-child,
-  table td:last-child{
+  table td:last-child {
     flex: 3;
   }
 
-  summary.danger{
+  .error-badge-count {
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    background-color: #DDD;
+  }
+
+  .error-badge-count.danger {
+    background-color: rgb(194, 0, 0);
+  }
+
+  .error-badge-count.warning {
+    background-color: rgb(194, 149, 0);
+  }
+
+  .danger {
     background-color: #713f3f;
   }
-  summary.success{
+
+  .success {
     background-color: #489d48;
   }
-    summary.info{
+
+  .info {
     background-color: #58d0ff;
   }
-  summary.warning{
+
+  .warning {
     background-color: #9d8648;
   }
+
+  .error-message {
+    font-weight: bold;
+
+  }
+
+  .error-message::before {
+    margin-right: 6px;
+  }
+
+  .error-message-success::before {
+    content: "✅ PASSED";
+  }
+
+  .error-message-info::before {
+    content: "ℹ️ INFO:";
+  }
+
+  .error-message-warning::before {
+    content: "⚠️ WARN:";
+  }
+
+  .error-message-danger::before {
+    content: "❌ FAILED:";
+  }
 </style>
-<div class="container">
+<div class="container d-flex gap-2 my-3 justify-content-center">
+  {%for error_level, count in error_levels_stat.items%}
+  <span class="error-badge-count {%if count%} {{error_level.level}} {%endif%}"> <b>{{error_level.level}}</b> :
+    {{count}}</span>
+  {%endfor%}
+</div>
+<div class="container ">
   {% include "render_tag.html" with tag_data=tag_data %}
 </div>
 {%endblock%}

@@ -12,14 +12,14 @@
     </div>
     <div class="col">
       <p>
-        {{tag_data.errors}}
+        <!-- {{tag_data.errors}} -->
 
         {%if tag_data.errors.non_field_errors%}
         {%for error in tag_data.errors.non_field_errors%}
-        <p class="text-{{error.level.level}}">❌ <b>FAILED</b>: {{error.message}}</p>
+        <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}">{{error.message}}</p>
         {%endfor%}
         {%else%}
-        <p class="text-success">✅ <b>PASSED</b></p>
+        <p class="error-message error-message-success text-success"></p>
         {%endif%}
       </p>
     </div>
@@ -59,10 +59,10 @@
         <td class="error-cell" >
           {%if attr_data.errors%}
           {%for error in attr_data.errors%}
-          <p class="text-{{error.level.level}}">❌ <b>FAILED</b>: {{error.message}}</p>
+          <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}">{{error.message}}</p>
           {%endfor%}
           {%else%}
-          <p class="text-success">✅ <b>PASSED</b></p>
+          <p class="error-message error-message-success text-success"></p>
           {%endif%}
         </td>
       </tr>
