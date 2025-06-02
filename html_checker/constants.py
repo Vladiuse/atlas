@@ -19,7 +19,7 @@ class ErrorLevel:
         return int(self) == int(other)
 
     def __repr__(self):
-        return f"<ErrorLevel {self.level}>"
+        return f"ErrorLevel(level='{self.level}')"
 
 SUCCESS = ErrorLevel("success")
 WARNING = ErrorLevel("warning")
