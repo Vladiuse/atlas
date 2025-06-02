@@ -39,7 +39,7 @@ class TagChecker:
             raise AttributeError('One of the parameter elem or selector must be set')
 
     def _bind_fields(self) -> None:
-        if hasattr(self, "_attributes") or hasattr(self, "_childrens"):
+        if hasattr(self, "_fields"):
             raise RuntimeError("Fields already bound")
         self._fields: dict[str, HtmlTagAttribute | TagChecker] = {}
         for name in dir(self.__class__):
