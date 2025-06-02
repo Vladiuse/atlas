@@ -2,28 +2,64 @@
 {% load static %}
 
 {%block content%}
+<style>
+  summary {
+    background-color: #36b336;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+  }
+</style>
 <div class="container">
+  {%for tag_name, tag_data in data.items%}
+  <details open>
+    <summary>{{tag_name}}</summary>
+    <!-- TAG TABLE -->
     <table class="table">
-        <thead>
-            <tr>
-                <th>Имя</th>
-                <th>Статус</th>
-                <th>Сообщение</th>
-                <th>Иконка</th>
-                <th>Elem</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in check_results %}
-            <tr class="table-{{result.status}}">
-                <td>{{ result.check_name }}</td>
-                <td>{{ result.level|capfirst }}</td>
-                <td>{{ result.message }}</td>
-                <td><span class="badge rounded-pill bg-{{result.level}}">{{result.level|capfirst}}</span></td>
-                <td>{{ result.elem }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Errors</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{tag_data.name}}</td>
+          <td>{{tag_data.type}}</td>
+          <td>{{tag_data.errors}}</td>
+        </tr>
+      </tbody>
     </table>
+    <!-- TAG TABLE -->
+
+    <!-- TAG ATTRIBUTES TABLE -->
+    <table class="table attribute-table table-primary">
+      <thead>
+        <tr>
+          <th scope="col">Type</th>
+          <th scope="col">Attr Name</th>
+          <th scope="col">Value</th>
+          <th scope="col">Errors</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%for attr_name, attr_data in tag_data.attrs.items%}
+        <tr>
+          <td>{{attr_data.type}}</td>
+          <td>{{attr_data.name}}</td>
+          <td>{{attr_data.value}}</td>
+          <td>{{attr_data.errors}}</td>
+        </tr>
+        {%endfor%}
+      </tbody>
+    </table>
+    <!-- TAG ATTRIBUTES TABLE -->
+
+    <!-- TAG CHILDRENS  -->
+
+     <!-- TAG CHILDRENS TABLE -->
+  </details>
+  {%endfor%}
 </div>
 {%endblock%}
