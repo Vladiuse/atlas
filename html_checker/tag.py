@@ -168,10 +168,11 @@ class TagChecker:
             except ValidationError as error:
                 field = getattr(self, field_name)
                 if isinstance(field, TagChecker):
-                    #self.errors.setdefault(field_name, {}).setdefault("non_field_errors", []).append(error)  # maybe will need later
-                     field.errors.setdefault("non_field_errors", []).append(error)
+                     if field.many is False:
+                        field.errors.setdefault("non_field_errors", []).append(error)
+                     else:
+                         self.errors.setdefault("non_field_errors", []).append(error)
                 elif isinstance(field, HtmlTagAttribute):
-                    #self.errors.setdefault(field_name, []).append(error)
                      field.errors.append(error)
                 else:
                     raise TypeError(f'Unknown class type of field {type(field)}')
@@ -189,6 +190,7 @@ class TagChecker:
 class ListTagChecker(TagChecker):
     def __init__(self, field: TagChecker):
         self.field = field
+        self.many = True
         self.root = None
         self.field_name = None
         self.items = []
