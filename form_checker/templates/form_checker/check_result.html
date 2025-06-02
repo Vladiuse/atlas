@@ -23,7 +23,11 @@
 
   .col {
     /* padding: 0.5rem; */
-    padding-left: 1.5rem;
+    /* padding-left: 1.5rem; */
+  }
+
+  .table > :not(caption) > * > *{
+    padding: 0.2rem 0.2rem;
   }
 
   table th {
@@ -38,11 +42,15 @@
   table th,
   table td {
     flex: 1;
+    display: flex;
+    align-items: center;
   }
 
   table th:last-child,
   table td:last-child {
     flex: 3;
+    flex-direction: column;
+    align-items: start;
   }
 
   .error-badge-count {
@@ -79,6 +87,9 @@
   .error-message {
     font-weight: bold;
 
+  }
+  .error-message span{
+    color: #222;
   }
 
   .error-message::before {
