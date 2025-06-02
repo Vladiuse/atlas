@@ -5,10 +5,11 @@ from typing import Callable, Optional
 
 from bs4 import Tag
 
-from .constants import ERROR, ErrorLevel
+from .constants import ERROR, ErrorLevel, SUCCESS
 from .exceptions import ValidationError
 from .tag_attribut import HtmlTagAttribute
 
+NON_FIELD_ERROR = "non_field_errors"
 
 class TagChecker:
     SELECTOR = None
@@ -115,13 +116,16 @@ class TagChecker:
 
     @property
     def error_level(self) -> ErrorLevel:
-        attributes_levels: list[ErrorLevel] = []
-        for attribute in self.attributes.values():
-            attributes_levels.append(attribute.error_level)
-        max_attribute_error_level = max(attributes_levels)
-        non_field_errors = self.errors.get("non_field_errors")
-        if non_field_errors:
-            max_level_error =  max(self.errors["non_field_errors"], key=lambda validation_error: validation_error.level)
+        # get attributes level errors
+        max_attribute_error_level = SUCCESS
+        if len(self.attributes) != 0:
+            attributes_levels: list[ErrorLevel] = []
+            for attribute in self.attributes.values():
+                attributes_levels.append(attribute.error_level)
+            max_attribute_error_level = max(attributes_levels)
+        # get non_fields (self) level errors
+        if self.errors.get(NON_FIELD_ERROR):
+            max_level_error =  max(self.errors[NON_FIELD_ERROR], key=lambda validation_error: validation_error.level)
             self_error_level = max_level_error.level
             return max(self_error_level, max_attribute_error_level)
         return max_attribute_error_level
@@ -138,7 +142,7 @@ class TagChecker:
             try:
                 validator()
             except ValidationError as error:
-                self.errors.setdefault("non_field_errors", []).append(error)
+                self.errors.setdefault(NON_FIELD_ERROR, []).append(error)
 
     def _run_fields_validation(self) -> None:
         for field_name, field in self._fields.items():
@@ -167,9 +171,9 @@ class TagChecker:
                 field = getattr(self, field_name)
                 if isinstance(field, TagChecker):
                      if field.many is False:
-                        field.errors.setdefault("non_field_errors", []).append(error)
+                        field.errors.setdefault(NON_FIELD_ERROR, []).append(error)
                      else:
-                         self.errors.setdefault("non_field_errors", []).append(error)
+                         self.errors.setdefault(NON_FIELD_ERROR, []).append(error)
                 elif isinstance(field, HtmlTagAttribute):
                      field.errors.append(error)
                 else:
