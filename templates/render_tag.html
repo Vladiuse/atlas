@@ -1,0 +1,74 @@
+
+<details open>
+  <summary>{{tag_data.name}}</summary>
+  <!-- TAG TABLE -->
+   <p class="text-center">
+    {%if tag_data.get_short_display%}
+    {{tag_data.get_short_display}}
+    {%endif%}
+   </p>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Type</th>
+        <th scope="col">Errors</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{tag_data.name}}</td>
+        <td>{{tag_data.type}}</td>
+        <td>
+          <!-- {{tag_data.errors}} -->
+          <!-- non_fields_errors of tag -->
+           {%if tag_data.errors.non_field_errors%}
+          {%for error in tag_data.errors.non_field_errors%}
+             <p><b>{{error_key}} Message non_field_error:</b> <span class="text-{{error.level}}">{{error.message}}</span></p>
+            <p><b>Level:</b> {{error.level}}</p>
+          {%endfor%}
+          {%else%}
+          -
+          {%endif%}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- TAG TABLE -->
+
+  <!-- TAG ATTRIBUTES TABLE -->
+  <table class="table attribute-table table-primary">
+    <thead>
+      <tr>
+        <th scope="col">Attr Name</th>
+        <th scope="col">Value</th>
+        <th scope="col">Errors</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%for attr_name, attr_data in tag_data.attrs.items%}
+      <tr>
+        <td>{{attr_data.name}}</td>
+        <td>{{attr_data.value}}</td>
+        <td>
+          {%if attr_data.errors%}
+          {%for error in attr_data.errors%}
+            <p ><b>Message:</b> <span class="text-{{error.level}}">{{error.message}}</span></p>
+            <p><b>Level:</b> {{error.level}}</p>
+          {%endfor%}
+          {%else%}
+          -
+          {%endif%}
+        </td>
+      </tr>
+      {%endfor%}
+    </tbody>
+  </table>
+  <!-- TAG ATTRIBUTES TABLE -->
+
+  <!-- TAG CHILDRENS  -->
+  {% for tag_name, tag_data in tag_data.children.items %}
+    {% include "render_tag.html" with data=tag_data %}
+  {% endfor %}
+  <!-- TAG CHILDRENS  -->
+</details>
