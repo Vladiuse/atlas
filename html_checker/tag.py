@@ -5,7 +5,7 @@ from typing import Callable, Optional
 
 from bs4 import Tag
 
-from .constants import ERROR
+from .constants import ERROR, ErrorLevel
 from .exceptions import ValidationError
 from .tag_attribut import HtmlTagAttribute
 
@@ -106,8 +106,25 @@ class TagChecker:
 
     @property
     def name(self) -> str:
-        name = self.tag_name if self.tag_name else self.selector
-        return f"{name}-{self.elem_number}" if self.elem_number else name
+        name = self.selector if self.selector else self.tag_name
+        if self.elem_number:
+            name = f"{name}-{self.elem_number}"
+        if self.root and self.root.name != 'html':
+            name = f"{self.root.name} > {name}"
+        return name
+
+    @property
+    def error_level(self) -> ErrorLevel:
+        attributes_levels: list[ErrorLevel] = []
+        for attribute in self.attributes.values():
+            attributes_levels.append(attribute.error_level)
+        max_attribute_error_level = max(attributes_levels)
+        non_field_errors = self.errors.get("non_field_errors")
+        if non_field_errors:
+            max_level_error =  max(self.errors["non_field_errors"], key=lambda validation_error: validation_error.level)
+            self_error_level = max_level_error.level
+            return max(self_error_level, max_attribute_error_level)
+        return max_attribute_error_level
 
     def run_validators(self) -> None:
         self.fill()  # заполняет классы объектами bs4 Tag

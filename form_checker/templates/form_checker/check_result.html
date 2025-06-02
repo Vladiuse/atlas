@@ -4,7 +4,7 @@
 {%block content%}
 <style>
   summary {
-    background-color: #36b336;
+    background-color: gray;
     color: white;
     font-weight: bold;
     text-align: center;
@@ -14,12 +14,42 @@
     margin-top: 0;
     margin-bottom: 0;
   }
+  .row{
+    background-color: #EEE;
+    margin-left: 0;
+    margin-right: 0;
+  }
   .col{
     padding: 0.5rem;
   }
   table th{
     font-weight: 400;
     text-transform: lowercase;
+  }
+
+  table tr{
+    display: flex;
+  }
+
+  table th, table td{
+    flex: 1;
+  }
+  table th:last-child,
+  table td:last-child{
+    flex: 3;
+  }
+
+  summary.danger{
+    background-color: #713f3f;
+  }
+  summary.success{
+    background-color: #489d48;
+  }
+    summary.info{
+    background-color: #58d0ff;
+  }
+  summary.warning{
+    background-color: #9d8648;
   }
 </style>
 <div class="container">

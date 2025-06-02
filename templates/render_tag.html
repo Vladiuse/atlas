@@ -1,6 +1,6 @@
 <details open>
-  <summary>{{tag_data.selector}}</summary>
-  <div class="row my-3">
+  <summary class="{{tag_data.error_level.level}}">{{tag_data.name}}</summary>
+  <div class="row mb-3">
     <div class="col">
       <p class="text-center">
         {%if tag_data.exist%}
@@ -39,7 +39,13 @@
       {%for attr_name, attr_data in tag_data.attributes.items%}
       <tr>
         <td><b>{{attr_data.name}}</b></td>
-        <td>"{{attr_data.value}}"</td>
+        <td>
+          {%if attr_data.value is None%}
+          -
+          {%else%}
+          "{{attr_data.value}}"
+          {%endif%}
+        </td>
         <td>
           {%if attr_data.expected%}
           "{{attr_data.expected}}"
