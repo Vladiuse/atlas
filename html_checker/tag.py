@@ -15,6 +15,7 @@ NON_FIELD_ERROR = "non_field_errors"
 
 class TagChecker:
     SELECTOR = None
+    DEFAULT_ERROR_LEVEL = levels.ERROR
 
     def __init__(  # noqa: PLR0913
         self,
@@ -189,6 +190,7 @@ class TagChecker:
         if self.required and self.elem is None:
             raise ValidationError(
                 message=f"Tag {self.__class__.__name__} required",
+                level=self.DEFAULT_ERROR_LEVEL,
             )
 
     def validate(self) -> None:
@@ -237,7 +239,10 @@ class ListTagChecker(TagChecker):
 
     def _required_validation(self) -> None:
         if self.field.required and len(self.items) == 0:
-            raise ValidationError(f"Must provide at least one item: {self.field.path_name}")
+            raise ValidationError(
+                f"Must provide at least one item: {self.field.path_name}",
+                level=self.DEFAULT_ERROR_LEVEL,
+            )
 
     def is_list_tag(self) -> bool:
         return True

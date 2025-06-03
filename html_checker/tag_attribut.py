@@ -5,6 +5,8 @@ from .exceptions import ValidationError
 
 
 class HtmlTagAttribute:
+    DEFAULT_ERROR_LEVEL = levels.ERROR
+
     def __init__(  # noqa: PLR0913
         self,
         name: str | None = None,
@@ -71,6 +73,7 @@ class HtmlTagAttribute:
         if self.value is None:
             raise ValidationError(
                 message=f'Attr "{self.name}" is required',
+                level=self.DEFAULT_ERROR_LEVEL,
             )
 
     def expected_validation(self) -> None:
@@ -79,6 +82,7 @@ class HtmlTagAttribute:
         if self._normalize(value=self.value) != self._normalize(value=self.expected):
             raise ValidationError(
                 message=f'Attr value must be "{self.expected}", actual "{self.value}"',
+                level=self.DEFAULT_ERROR_LEVEL,
             )
 
     def choices_validation(self) -> None:
@@ -87,6 +91,7 @@ class HtmlTagAttribute:
         if self._normalize(value=self.value) not in [self._normalize(value=choice) for choice in self.choices]:
             raise ValidationError(
                 message=f'Attr value must be on of {self.choices}, actual "{self.value}"',
+                level=self.DEFAULT_ERROR_LEVEL,
             )
 
     def validate(self) -> None:
