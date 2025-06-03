@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .levels import SUCCESS, ErrorLevel
+from . import levels
 from .exceptions import ValidationError
 
 
@@ -33,11 +33,11 @@ class HtmlTagAttribute:
         return f'{self.name}="{self.value}"'
 
     @property
-    def error_level(self) -> ErrorLevel:
+    def error_level(self) -> levels.ErrorLevel:
         if self.errors:
             max_level_error = max(self.errors, key=lambda validation_error: validation_error.level)
             return max_level_error.level
-        return SUCCESS
+        return levels.SUCCESS
 
     def bind(self, root: "TagChecker", field_name: str) -> None:  # noqa: F821
         self.root = root

@@ -6,7 +6,7 @@ from typing import Callable, Optional
 from bs4 import Tag
 from bs4.element import AttributeValueList
 
-from .levels import ERROR, SUCCESS, ErrorLevel
+from . import levels
 from .exceptions import ValidationError
 from .tag_attribut import HtmlTagAttribute
 
@@ -24,7 +24,7 @@ class TagChecker:
         required: bool = True,
         prefix: str = "",
         root: Optional["TagChecker"] = None,
-        not_exist_error_level: str = ERROR,
+        not_exist_error_level: str = levels.ERROR,
         elem_number: int | None = None,
     ):
         self.selector = selector if selector else self.SELECTOR
@@ -109,7 +109,7 @@ class TagChecker:
 
     @property
     def tag_name(self) -> str:
-        return self.elem.name if self.elem else 'None'
+        return self.elem.name if self.elem else "None"
 
     @property
     def path_name(self) -> str:
@@ -121,11 +121,11 @@ class TagChecker:
         return name
 
     @property
-    def error_level(self) -> ErrorLevel:
+    def error_level(self) -> levels.ErrorLevel:
         # get attributes level errors
-        max_attribute_error_level = SUCCESS
+        max_attribute_error_level = levels.SUCCESS
         if len(self.attributes) != 0:
-            attributes_levels: list[ErrorLevel] = []
+            attributes_levels: list[levels.ErrorLevel] = []
             for attribute in self.attributes.values():
                 attributes_levels.append(attribute.error_level)
             max_attribute_error_level = max(attributes_levels)
