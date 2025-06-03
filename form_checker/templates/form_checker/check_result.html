@@ -112,6 +112,7 @@
     content: "❌ FAILED:";
   }
 </style>
+<h4 class="text-center my-2">Пресет: {{check_result.preset_name}}</h4>
 <div class="container d-flex gap-2 my-3 justify-content-center">
   {%for error_level, count in check_result.errors_level_stat.items%}
   <span class="error-badge-count {%if count%} {{error_level.level}} {%endif%}"> <b>{{error_level.level}}</b> :
