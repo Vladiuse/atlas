@@ -1,7 +1,0 @@
-ATLAS_TEAM = "Atlas Team"
-ADFORCE = "AdForce"
-
-TEAMS_CHOICES = (
-    (ATLAS_TEAM, ATLAS_TEAM),
-    (ADFORCE, ADFORCE),
-)
