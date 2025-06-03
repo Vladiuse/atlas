@@ -1,4 +1,4 @@
-<details {%if tag_data.errors%} open {%endif%}>
+<details {%if tag_data.errors and tag_data.path_name != html %} open {%endif%}>
   <summary class="{{tag_data.error_level.level}}">{{tag_data.path_name}}</summary>
   <div class="row mb-3">
     <div class="col">
@@ -16,25 +16,27 @@
 
         {%if tag_data.errors.non_field_errors%}
         {%for error in tag_data.errors.non_field_errors%}
-        <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}"><span>{{error.message}}</span></p>
-        {%endfor%}
-        {%else%}
-        <p class="error-message error-message-success text-success"></p>
-        {%endif%}
+      <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}">
+        <span>{{error.message}}</span>
+      </p>
+      {%endfor%}
+      {%else%}
+      <p class="error-message error-message-success text-success"></p>
+      {%endif%}
       </p>
     </div>
   </div>
   {%if tag_data.exist and tag_data.attributes%}
   <!-- TAG ATTRIBUTES TABLE -->
-   
 
-   <table class="table">
+
+  <table class="table">
     <thead>
       <tr>
         <th scope="col">Attr</th>
         <th scope="col">Value</th>
         <th scope="col">Expected</th>
-        <th scope="col" >Errors</th>
+        <th scope="col">Errors</th>
       </tr>
     </thead>
     <tbody>
@@ -56,10 +58,12 @@
           {{attr_data.choices}}
           {%endif%}
         </td>
-        <td class="error-cell" >
+        <td class="error-cell">
           {%if attr_data.errors%}
           {%for error in attr_data.errors%}
-          <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}"><span>{{error.message}}</span></p>
+          <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}">
+            <span>{{error.message}}</span>
+          </p>
           {%endfor%}
           {%else%}
           <p class="error-message error-message-success text-success"></p>
