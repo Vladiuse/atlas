@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import Callable, Optional
 
 from bs4 import Tag
+from bs4.element import AttributeValueList
 
 from .constants import ERROR, SUCCESS, ErrorLevel
 from .exceptions import ValidationError
@@ -75,7 +76,10 @@ class TagChecker:
     def _fill_attributes(self) -> None:
         for attribute_field_name, attribute in self.attributes.items():
             with contextlib.suppress(KeyError):
-                attribute.value = self.elem[attribute.name]
+                attribute_value = self.elem[attribute.name]
+                if isinstance(attribute_value, AttributeValueList):
+                    attribute_value = " ".join(attribute_value)
+                attribute.value = attribute_value
 
     def _fill_childrens(self) -> None:
         for child_name, children in self.childrens.items():
