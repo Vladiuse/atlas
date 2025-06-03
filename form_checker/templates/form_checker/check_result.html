@@ -113,12 +113,12 @@
   }
 </style>
 <div class="container d-flex gap-2 my-3 justify-content-center">
-  {%for error_level, count in error_levels_stat.items%}
+  {%for error_level, count in check_result.errors_level_stat.items%}
   <span class="error-badge-count {%if count%} {{error_level.level}} {%endif%}"> <b>{{error_level.level}}</b> :
     {{count}}</span>
   {%endfor%}
 </div>
 <div class="container ">
-  {% include "render_tag.html" with tag_data=tag_data %}
+  {% include "render_tag.html" with tag_data=check_result.preset %}
 </div>
 {%endblock%}

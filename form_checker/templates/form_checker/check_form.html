@@ -17,19 +17,19 @@
         </div>
         {% endif %}
         <div class="mb-3">
-            <label for="{{ form.team.id_for_label }}" class="form-label">Команда</label>
-            <select name="{{ form.team.name }}" id="{{ form.team.id_for_label }}"
-                class="form-select {% if form.team.errors %}is-invalid{% endif %}">
-                {% for option in form.team.field.choices %}
+            <label for="{{ form.preset_name.id_for_label }}" class="form-label">Команда</label>
+            <select name="{{ form.preset_name.name }}" id="{{ form.preset_name.id_for_label }}"
+                class="form-select {% if form.preset_name.errors %}is-invalid{% endif %}">
+                {% for option in form.preset_name.field.choices %}
                 <option value="{{ option.0 }}">
-                    <!-- <option value="{{ option.0 }}" {% if option.0 == form.team.value %} selected {% endif %}> -->
+                    <!-- <option value="{{ option.0 }}" {% if option.0 == form.preset_name.value %} selected {% endif %}> -->
                     {{ option.1 }}
                 </option>
                 {% endfor %}
             </select>
-            {% if form.team.errors %}
+            {% if form.preset_name.errors %}
             <div class="invalid-feedback">
-                {{ form.team.errors.0 }}
+                {{ form.preset_name.errors.0 }}
             </div>
             {% endif %}
         </div>

@@ -237,7 +237,7 @@ class ListTagChecker(TagChecker):
 
     def _required_validation(self) -> None:
         if self.field.required and len(self.items) == 0:
-            raise ValidationError(f"Must provide at least one item: {self.field.name}")
+            raise ValidationError(f"Must provide at least one item: {self.field.path_name}")
 
     def is_list_tag(self) -> bool:
         return True
