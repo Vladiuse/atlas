@@ -72,7 +72,7 @@ class TagChecker:
         if hasattr(self, GET_ELEMENT_METHOD_NAME):
             get_element_method = getattr(self, GET_ELEMENT_METHOD_NAME)
             element = get_element_method()
-            if not isinstance(element, Tag):
+            if not (isinstance(element, Tag) or element is None):
                 raise TypeError(f"GET_ELEMENT_METHOD_NAME method must return bs4.Tag type, not {type(element)}")
             self.elem = element
             return
@@ -119,7 +119,7 @@ class TagChecker:
 
     @property
     def tag_name(self) -> str:
-        return self.elem.name if self.elem else "None"
+        return self.elem.name if self.elem else self.__class__.__name__
 
     @property
     def path_name(self) -> str:

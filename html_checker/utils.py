@@ -1,3 +1,5 @@
+import re
+from bs4 import Tag
 from collections import OrderedDict
 from collections.abc import Mapping
 
@@ -49,6 +51,13 @@ def convert_to_dict(elem):
         }
 
     return {"1": "1"}
+
+def find_script_with_js_function(scripts: list[Tag], js_function_name: str) -> Tag | None:
+    for script in scripts:
+        pattern = rf"function[\t ]+{re.escape(js_function_name)}[\t ]*\("
+        if re.search(pattern, script.text):
+            return script
+    return None
 
 
 def get_errors_levels_stat(tag: TagChecker) -> OrderedDict[ErrorLevel, int]:
