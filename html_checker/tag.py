@@ -23,7 +23,6 @@ class TagChecker:
         elem: Tag | None = None,
         many: bool = False,
         required: bool = True,
-        prefix: str = "",
         root: Optional["TagChecker"] = None,
         not_exist_error_level: str = levels.ERROR,
         elem_number: int | None = None,
@@ -33,7 +32,6 @@ class TagChecker:
         self.elem = elem
         self.many = many
         self.root = root
-        self.prefix = prefix
         self.errors = OrderedDict()
         self.required = required
         self.not_exist_error_level = not_exist_error_level
