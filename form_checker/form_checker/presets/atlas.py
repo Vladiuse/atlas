@@ -1,6 +1,9 @@
-import re
+from bs4 import Tag
+
 from html_checker import HtmlTagAttribute, TagChecker, levels
 from html_checker.exceptions import ValidationError
+from html_checker.utils import find_script_with_js_function
+
 
 class Title(TagChecker):
     def validate(self) -> None:
@@ -66,35 +69,24 @@ class OrderForm(TagChecker):
     sub_id_9 = Sub9Select()
 
 
-class JsFuncDetector(TagChecker):
-    """Чекер для поиска наличия js функции к коде index.html"""
-    FUNCTION_NAME_TO_SEARCH = None
+class GetShortImageSrcDetector(TagChecker):
+    SELECTOR = "script with getShortImageSrc"
 
-    def validate(self) -> None:
-        if self.FUNCTION_NAME_TO_SEARCH is None:
-            raise AttributeError('Set FUNCTION_NAME_TO_SEARCH')
+    def get_element(self) -> Tag | None:
         scripts = self.root.elem.select("script")
-        is_func_exist = False
-        for script in scripts:
-            pattern = rf"function[\t ]+{re.escape(self.FUNCTION_NAME_TO_SEARCH)}[\t ]*\("
-            if re.search(pattern, script.text):
-                is_func_exist = True
-                break
-        if not is_func_exist:
-            raise ValidationError(f"Функция {self.FUNCTION_NAME_TO_SEARCH} не найдена", level=levels.WARNING)
+        return find_script_with_js_function(scripts=scripts, js_function_name="getShortImageSrc")
 
 
-class GetShortImageSrcDetector(JsFuncDetector):
-    FUNCTION_NAME_TO_SEARCH = "getShortImageSrc"
-    SELECTOR = "script-getShortImageSrc"
+class InjectScriptDetector(TagChecker):
+    SELECTOR = "script with injectScript"
 
-class InjectScriptDetector(JsFuncDetector):
-    FUNCTION_NAME_TO_SEARCH = "injectScript"
-    SELECTOR = "script-injectScript"
+    def get_element(self) -> Tag | None:
+        scripts = self.root.elem.select("script")
+        return find_script_with_js_function(scripts=scripts, js_function_name="injectScript")
 
 
 class AtlasHtml(TagChecker):
-    title = Title(selector="title")
+    title = Title(selector='title')
     form = OrderForm(selector="form", many=True)
-    short_img_script = GetShortImageSrcDetector(required=False)
-    inject_script = InjectScriptDetector(required=False)
+    short_img_script = GetShortImageSrcDetector()
+    inject_script = InjectScriptDetector()
