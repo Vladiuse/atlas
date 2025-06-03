@@ -6,5 +6,6 @@ from html_checker import TagChecker
 
 @dataclass
 class HtmlCheckResult:
+    preset_name: str
     preset: TagChecker
     errors_level_stat: OrderedDict
