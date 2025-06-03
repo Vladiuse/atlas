@@ -11,6 +11,7 @@ from .exceptions import ValidationError
 from .tag_attribut import HtmlTagAttribute
 
 NON_FIELD_ERROR = "non_field_errors"
+GET_ELEMENT_METHOD_NAME = 'get_element'
 
 
 class TagChecker:
@@ -38,8 +39,6 @@ class TagChecker:
         self.elem_number = elem_number
         self._bind_fields()
 
-        if not any([self.elem, self.selector]):
-            raise AttributeError("One of the parameter elem or selector must be set")
 
     def _bind_fields(self) -> None:
         if hasattr(self, "_fields"):
@@ -70,7 +69,19 @@ class TagChecker:
             self._fill_childrens()
 
     def find_elem(self) -> None:
-        self.elem = self.root.elem.select_one(self.selector)
+        if hasattr(self, GET_ELEMENT_METHOD_NAME):
+            get_element_method = getattr(self, GET_ELEMENT_METHOD_NAME)
+            element = get_element_method()
+            if not isinstance(element, Tag):
+                raise TypeError(f"GET_ELEMENT_METHOD_NAME method must return bs4.Tag type, not {type(element)}")
+            self.elem = element
+            return
+        if self.elem:
+            return
+        if self.selector:
+            self.elem = self.root.elem.select_one(self.selector)
+            return
+        raise AttributeError(f"Set 'elem', 'selector', or define '{GET_ELEMENT_METHOD_NAME}' method in your class")
 
     def _fill_attributes(self) -> None:
         for attribute_field_name, attribute in self.attributes.items():
@@ -187,7 +198,7 @@ class TagChecker:
     def _required_validation(self) -> None:
         if self.required and self.elem is None:
             raise ValidationError(
-                message=f"Tag {self.__class__.__name__} required",
+                message=f"Tag <{self.__class__.__name__}> required",
                 level=self.DEFAULT_ERROR_LEVEL,
             )
 
