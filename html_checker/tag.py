@@ -108,16 +108,16 @@ class TagChecker:
         return ""
 
     @property
-    def tag_name(self) -> str | None:
-        return self.elem.name if self.elem else None
+    def tag_name(self) -> str:
+        return self.elem.name if self.elem else 'None'
 
     @property
-    def name(self) -> str:
+    def path_name(self) -> str:
         name = self.selector if self.selector else self.tag_name
         if self.elem_number:
             name = f"{name}-{self.elem_number}"
-        if self.root and self.root.name != "html":
-            name = f"{self.root.name} > {name}"
+        if self.root and self.root.tag_name != "html":
+            name = f"{self.root.path_name} > {name}"
         return name
 
     @property
@@ -203,6 +203,9 @@ class ListTagChecker(TagChecker):
         self.field_name = None
         self.items = []
         self.errors = []
+
+    def __iter__(self):
+        return iter(self.items)
 
     def bind(self, root: "TagChecker", field_name: str) -> None:
         self.root = root
