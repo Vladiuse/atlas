@@ -1,3 +1,6 @@
+from typing import Union
+
+
 class ErrorLevel:
     PRIORITY = {
         "success": 0,
@@ -12,10 +15,10 @@ class ErrorLevel:
     def __int__(self):
         return self.PRIORITY[self.level]
 
-    def __lt__(self, other: 'ErrorLevel' | int):
+    def __lt__(self, other: Union['ErrorLevel', int]):
         return int(self) < int(other)
 
-    def __eq__(self, other: 'ErrorLevel' | int):
+    def __eq__(self, other: Union['ErrorLevel', int]):
         return int(self) == int(other)
 
     def __hash__(self):
