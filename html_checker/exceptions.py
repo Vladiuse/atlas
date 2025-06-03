@@ -1,10 +1,4 @@
-from common.exceptions import AppException
-
 from .levels import ERROR, ErrorLevel
-
-
-class FormNotFound(AppException):
-    pass
 
 
 class ValidationError(Exception):
