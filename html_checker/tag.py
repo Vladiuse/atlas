@@ -73,9 +73,9 @@ class TagChecker:
         self.elem = self.root.elem.select_one(self.selector)
 
     def _fill_attributes(self) -> None:
-        for attribute_name, attribute in self.attributes.items():
+        for attribute_field_name, attribute in self.attributes.items():
             with contextlib.suppress(KeyError):
-                attribute.value = self.elem[attribute_name]
+                attribute.value = self.elem[attribute.name]
 
     def _fill_childrens(self) -> None:
         for child_name, children in self.childrens.items():
