@@ -53,6 +53,7 @@ def convert_to_dict(elem):
     return {"1": "1"}
 
 def find_script_with_js_function(scripts: list[Tag], js_function_name: str) -> Tag | None:
+    """Поиск тега script в котором есть указанная функция (поиск по имени)"""
     for script in scripts:
         pattern = rf"function[\t ]+{re.escape(js_function_name)}[\t ]*\("
         if re.search(pattern, script.text):
