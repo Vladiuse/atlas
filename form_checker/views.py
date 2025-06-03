@@ -1,26 +1,30 @@
-from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views import View
+from django.http import HttpResponse
 from django.shortcuts import render
-from .forms import CheckFormsByUrlForm
-from .form_checker.main import HtmlChecker
-from html_checker.exceptions import FormNotFound
+from django.views import View
 from requests.exceptions import RequestException
 
-html_form_checker = HtmlChecker()
+from common.request_sender import RequestSender
+
+from .form_checker import HtmlChecker
+from .form_checker.exceptions import HtmlTagNotFound
+from .forms import CheckFormsByUrlForm
+
+html_checker = HtmlChecker(request_sender=RequestSender())
+
 
 def index(request):
     return HttpResponse("123")
 
 
 class CheckFormView(LoginRequiredMixin, View):
+    template_name = "form_checker/check_form.html"
+    result_template_name = "form_checker/check_result.html"
 
-    template_name = 'form_checker/check_form.html'
-    result_template_name = 'form_checker/check_result.html'
     def get(self, request):
         form = CheckFormsByUrlForm()
         content = {
-            'form': form,
+            "form": form,
         }
         return render(request, self.template_name, content)
 
@@ -28,18 +32,18 @@ class CheckFormView(LoginRequiredMixin, View):
         form = CheckFormsByUrlForm(request.POST)
         if form.is_valid():
             try:
-                html = form.cleaned_data['html']
-                url = form.cleaned_data['url']
-                team = form.cleaned_data['team']
-                check_results = html_form_checker.check(html=html, url=url, team=team)
+                html = form.cleaned_data["html"]
+                url = form.cleaned_data["url"]
+                preset_name = form.cleaned_data["preset_name"]
+                check_result = html_checker.check(preset_name=preset_name, html=html, url=url)
                 content = {
-                    'check_results': check_results,
+                    "check_result": check_result,
                 }
                 return render(request, self.result_template_name, content)
             except RequestException as e:
-                message = f'Не удалось загрузить сайт: {e}'
+                message = f"Не удалось загрузить сайт: {e}"
                 form.add_error(None, str(message))
-            except FormNotFound as e:
+            except HtmlTagNotFound as e:
                 form.add_error(None, str(e))
         content = {
             "form": form,
