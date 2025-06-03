@@ -1,4 +1,4 @@
-<details open>
+<details {%if tag_data.errors%} open {%endif%}>
   <summary class="{{tag_data.error_level.level}}">{{tag_data.path_name}}</summary>
   <div class="row mb-3">
     <div class="col">
