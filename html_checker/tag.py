@@ -101,9 +101,6 @@ class TagChecker:
     def exist(self) -> bool:
         return bool(self.elem)
 
-    def is_list_tag(self) -> bool:
-        return False
-
     @property
     def attributes(self) -> dict[str, HtmlTagAttribute]:
         return {field_name: field for field_name, field in self._fields.items() if isinstance(field, HtmlTagAttribute)}
@@ -248,6 +245,3 @@ class ListTagChecker(TagChecker):
                 f"Must provide at least one item: {self.field.path_name}",
                 level=self.DEFAULT_ERROR_LEVEL,
             )
-
-    def is_list_tag(self) -> bool:
-        return True
