@@ -76,7 +76,7 @@
   {% if tag_data.childrens %}
 
   {% for child_key, child_tag in tag_data.childrens.items %}
-  {% if child_tag.is_list_tag %}
+  {% if child_tag.many %}
   {# Это список тегов #}
   {% for child_data in child_tag.items %}
   {% include "render_tag.html" with tag_data=child_data %}
