@@ -12,10 +12,10 @@ class ErrorLevel:
     def __int__(self):
         return self.PRIORITY[self.level]
 
-    def __lt__(self, other):
+    def __lt__(self, other: 'ErrorLevel' | int):
         return int(self) < int(other)
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'ErrorLevel' | int):
         return int(self) == int(other)
 
     def __hash__(self):
