@@ -218,10 +218,6 @@ class ListTagChecker(TagChecker):
     def __iter__(self):
         return iter(self.items)
 
-    def bind(self, root: "TagChecker", field_name: str) -> None:
-        self.root = root
-        self.field_name = field_name
-
     def find_elem(self) -> None:
         elements = self.root.elem.select(self.field.selector)
         for elem_number, elem in enumerate(elements):
