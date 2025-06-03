@@ -221,7 +221,7 @@ class ListTagChecker(TagChecker):
         try:
             self._required_validation()
         except ValidationError as error:
-            self.errors.append(error)
+            self.root.errors.setdefault(NON_FIELD_ERROR, []).append(error)
             return
         for field in self.items:
             field.run_validators()
@@ -234,7 +234,7 @@ class ListTagChecker(TagChecker):
 
     def _required_validation(self) -> None:
         if self.field.required and len(self.items) == 0:
-            raise ValidationError("Must provide at least one item")
+            raise ValidationError(f"Must provide at least one item: {self.field.name}")
 
     def is_list_tag(self) -> bool:
         return True
