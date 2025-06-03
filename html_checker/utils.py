@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from html_checker import HtmlTagAttribute, ListTagChecker, TagChecker, ValidationError
 from collections.abc import Mapping
-from .constants import ERROR, INFO, SUCCESS, WARNING, ErrorLevel
+from .levels import ERROR, INFO, SUCCESS, WARNING, ErrorLevel
 from .exceptions import ValidationError
 from .tag import NON_FIELD_ERROR
 

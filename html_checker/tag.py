@@ -6,7 +6,7 @@ from typing import Callable, Optional
 from bs4 import Tag
 from bs4.element import AttributeValueList
 
-from .constants import ERROR, SUCCESS, ErrorLevel
+from .levels import ERROR, SUCCESS, ErrorLevel
 from .exceptions import ValidationError
 from .tag_attribut import HtmlTagAttribute
 

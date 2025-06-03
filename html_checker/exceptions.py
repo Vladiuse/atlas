@@ -1,6 +1,6 @@
 from common.exceptions import AppException
 
-from .constants import ERROR, ErrorLevel
+from .levels import ERROR, ErrorLevel
 
 
 class FormNotFound(AppException):

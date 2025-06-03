@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .constants import SUCCESS, ErrorLevel
+from .levels import SUCCESS, ErrorLevel
 from .exceptions import ValidationError
 
 
