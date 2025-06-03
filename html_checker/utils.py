@@ -1,10 +1,10 @@
 from collections import OrderedDict
-from html_checker import HtmlTagAttribute, ListTagChecker, TagChecker, ValidationError
 from collections.abc import Mapping
-from .levels import ERROR, INFO, SUCCESS, WARNING, ErrorLevel
-from .exceptions import ValidationError
-from .tag import NON_FIELD_ERROR
 
+from html_checker import HtmlTagAttribute, ListTagChecker, TagChecker, ValidationError
+
+from .exceptions import ValidationError
+from .levels import ERROR, INFO, SUCCESS, WARNING, ErrorLevel
 
 
 def convert_errors(err: dict) -> dict | list | str:
@@ -51,13 +51,16 @@ def convert_to_dict(elem):
     return {"1": "1"}
 
 
-def get_errors_levels_stat(tag: TagChecker) -> dict[ErrorLevel, int]:
-    result = OrderedDict([
-        (SUCCESS, 0),
-        (INFO, 0),
-        (WARNING, 0),
-        (ERROR, 0),
-    ])
+def get_errors_levels_stat(tag: TagChecker) -> OrderedDict[ErrorLevel, int]:
+    result = OrderedDict(
+        [
+            (SUCCESS, 0),
+            (INFO, 0),
+            (WARNING, 0),
+            (ERROR, 0),
+        ]
+    )
+
     def collect_errors(error_collection: list | Mapping) -> None:
         if isinstance(error_collection, Mapping):
             for key, value in error_collection.items():
@@ -71,24 +74,7 @@ def get_errors_levels_stat(tag: TagChecker) -> dict[ErrorLevel, int]:
                 else:
                     raise TypeError(f"Incorrect error collection type: {type(error_collection)}")
         else:
-            raise TypeError(f'Incorrect error collection type: {type(error_collection)}')
-
-    # def collect_errors(tag_checker: TagChecker) -> None:
-    #     if isinstance(tag_checker, ListTagChecker):
-    #         for item in tag_checker.items:
-    #             collect_errors(item)
-    #     else:
-    #         # Считаем ошибки атрибутов
-    #         for attr in tag_checker.attributes.values():
-    #             for error in attr.errors:
-    #                 result[error.level] += 1
-    #         # Считаем ошибки non_field
-    #         for error in tag_checker.errors.get(NON_FIELD_ERROR, []):
-    #             result[error.level] += 1
-    #         # Рекурсивно проходимся по дочерним тегам
-    #         for child in tag_checker.childrens.values():
-    #             collect_errors(child)
+            raise TypeError(f"Incorrect error collection type: {type(error_collection)}")
 
     collect_errors(tag.errors)
     return result
-
