@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from collections.abc import Mapping
 
-from html_checker import HtmlTagAttribute, ListTagChecker, TagChecker, ValidationError
+from html_checker import HtmlTagAttribute, ListTagChecker, TagChecker
 
 from .exceptions import ValidationError
 from .levels import ERROR, INFO, SUCCESS, WARNING, ErrorLevel
@@ -58,7 +58,7 @@ def get_errors_levels_stat(tag: TagChecker) -> OrderedDict[ErrorLevel, int]:
             (INFO, 0),
             (WARNING, 0),
             (ERROR, 0),
-        ]
+        ],
     )
 
     def collect_errors(error_collection: list | Mapping) -> None:
