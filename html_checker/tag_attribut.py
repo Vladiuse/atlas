@@ -31,8 +31,8 @@ class HtmlTagAttribute:
         if any([self.expected, self.choices]):
             self.required = True
 
-    def __str__(self):
-        return f'{self.name}="{self.value}"'
+    def __repr__(self):
+        return f'<Attr:{self.name}="{self.value}">'
 
     @property
     def error_level(self) -> levels.ErrorLevel:
@@ -96,6 +96,7 @@ class HtmlTagAttribute:
 
     def validate(self) -> None:
         """Hook"""
+
 
 
 HTTP_METHODS = [
