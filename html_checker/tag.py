@@ -1,7 +1,7 @@
 import contextlib
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 from bs4 import Tag
 from bs4.element import AttributeValueList
@@ -58,23 +58,22 @@ class TagChecker:
             attr = getattr(self.__class__, name)
             if isinstance(attr, HtmlTagAttribute):
                 field = deepcopy(attr)
-                self._fields[name] = field
-                setattr(self, name, field)
-                field.bind(root=self, field_name=name)
+                self._set_field(field=field, field_name=name)
             elif isinstance(attr, TagChecker):
                 field = ListTagChecker(field=attr) if attr.many else deepcopy(attr)
-                self._fields[name] = field
-                setattr(self, name, field)
-                field.bind(root=self, field_name=name)
-
+                self._set_field(field=field, field_name=name)
+        # for attributes from Tag param
         if self._attributes:
             for name, attribute_data in self._attributes.items():
                 field = HtmlTagAttribute(**attribute_data)
                 if hasattr(self, name):
                     raise AttributeError(f'{self} already have attribute "{name}" as field.')
-                self._fields[name] = field
-                setattr(self, name, field)
-                field.bind(root=self, field_name=name)
+                self._set_field(field=field, field_name=name)
+
+    def _set_field(self, field: Union["TagChecker", HtmlTagAttribute], field_name: str) -> None:
+        self._fields[field_name] = field
+        setattr(self, field_name, field)
+        field.bind(root=self, field_name=field_name)
 
     def bind(self, root: "TagChecker", field_name: str) -> None:
         self.root = root
