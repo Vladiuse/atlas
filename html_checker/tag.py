@@ -27,6 +27,7 @@ class TagChecker:
         root: Optional["TagChecker"] = None,
         not_exist_error_level: str = levels.ERROR,
         elem_number: int | None = None,
+        attributes: dict[str: dict] | None = None,
     ):
         self.selector = selector if selector else self.SELECTOR
         self.field_name = None
@@ -37,7 +38,14 @@ class TagChecker:
         self.required = required
         self.not_exist_error_level = not_exist_error_level
         self.elem_number = elem_number
+        self._attributes = attributes
         self._bind_fields()
+
+    def __repr__(self):
+        return f"<Tag:{self.tag_name}>"
+
+    def __str__(self):
+        return repr(self)
 
 
     def _bind_fields(self) -> None:
@@ -55,6 +63,15 @@ class TagChecker:
                 field.bind(root=self, field_name=name)
             elif isinstance(attr, TagChecker):
                 field = ListTagChecker(field=attr) if attr.many else deepcopy(attr)
+                self._fields[name] = field
+                setattr(self, name, field)
+                field.bind(root=self, field_name=name)
+
+        if self._attributes:
+            for name, attribute_data in self._attributes.items():
+                field = HtmlTagAttribute(**attribute_data)
+                if hasattr(self, name):
+                    raise AttributeError(f'{self} already have attribute "{name}" as field.')
                 self._fields[name] = field
                 setattr(self, name, field)
                 field.bind(root=self, field_name=name)
