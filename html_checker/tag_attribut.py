@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 
 from . import levels
 from .exceptions import ValidationError
@@ -15,7 +15,7 @@ class HtmlTagAttribute:
         required: bool = True,
         ignore_case: bool = False,
         expected: str | None = None,
-        choices: list[str] | None = None,
+        choices: Sequence[str] | None = None,
     ):
         self.name = name
         self.root = root
@@ -79,6 +79,8 @@ class HtmlTagAttribute:
     def expected_validation(self) -> None:
         if self.expected is None:
             return
+        if self.expected is not isinstance(self.choices, str):
+            raise TypeError(f'"expected" must be string, got {type(self.choices).__name__}')
         if self._normalize(value=self.value) != self._normalize(value=self.expected):
             raise ValidationError(
                 message=f'Attr value must be "{self.expected}", actual "{self.value}"',
@@ -88,6 +90,8 @@ class HtmlTagAttribute:
     def choices_validation(self) -> None:
         if self.choices is None:
             return
+        if self.choices is not isinstance(self.choices, (list, tuple)):
+            raise TypeError(f'"choices" must be a list or tuple of strings, got {type(self.choices).__name__}')
         if self._normalize(value=self.value) not in [self._normalize(value=choice) for choice in self.choices]:
             raise ValidationError(
                 message=f'Attr value must be on of {self.choices}, actual "{self.value}"',
