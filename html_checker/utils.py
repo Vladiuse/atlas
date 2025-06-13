@@ -21,7 +21,7 @@ def convert_errors(err: dict) -> dict | list | str:
 
 def convert_to_dict(elem):
     if isinstance(elem, ListTagChecker):
-        return [convert_to_dict(item) for item in elem.items]
+        return [convert_to_dict(item) for item in elem.tags_items]
 
     if isinstance(elem, TagChecker):
         return {

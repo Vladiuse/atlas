@@ -194,18 +194,16 @@ class TagChecker:
         return None
 
     def _run_custom_field_validator(self, field_name: str) -> None:
-        method = self._get_custom_field_validator(field_name=field_name)
-        if method is not None:
+        field_validation_method = self._get_custom_field_validator(field_name=field_name)
+        if field_validation_method is not None:
             field = getattr(self, field_name)
             try:
-                method(field=field)
+                field_validation_method(field=field)
             except ValidationError as error:
-                field = getattr(self, field_name)
-                if isinstance(field, (TagChecker, ListTagChecker)):
-                    if field.many is False:
-                        field.errors.setdefault(NON_FIELD_ERROR, []).append(error)
-                    else:
-                        self.errors.setdefault(NON_FIELD_ERROR, []).append(error)
+                if isinstance(field,TagChecker):
+                    field.errors.setdefault(NON_FIELD_ERROR, []).append(error)
+                elif isinstance(field, ListTagChecker):
+                    self.errors.setdefault(NON_FIELD_ERROR, []).append(error)
                 elif isinstance(field, HtmlTagAttribute):
                     field.errors.append(error)
                 else:
@@ -230,18 +228,14 @@ class ListTagChecker:
         self.many = True
         self.root = None
         self.field_name = None
-        self.items = []
+        self.tags_items = []
         self.errors = []
 
     def __iter__(self):
-        return iter(self.items)
+        return iter(self.tags_items)
 
     def __len__(self):
-        return len(self.items)
-
-    @property
-    def tag_name(self) -> str:
-        return  self.__class__.__name__
+        return len(self.tags_items)
 
     def bind(self, root: "TagChecker", field_name: str) -> None:
         self.root = root
@@ -254,7 +248,7 @@ class ListTagChecker:
             field.elem = elem
             field.elem_number = elem_number + 1
             field.root = self.root
-            self.items.append(field)
+            self.tags_items.append(field)
             field.fill()
 
     def run_validators(self) -> None:
@@ -263,13 +257,13 @@ class ListTagChecker:
         except ValidationError as error:
             self.root.errors.setdefault(NON_FIELD_ERROR, []).append(error)
             return
-        for field in self.items:
+        for field in self.tags_items:
             field.run_validators()
-        for field in self.items:
+        for field in self.tags_items:
             self.errors.append(field.errors)
 
     def _required_validation(self) -> None:
-        if self.field.required and len(self.items) == 0:
+        if self.field.required and len(self.tags_items) == 0:
             raise ValidationError(
                 f"Must provide at least one item: {self.field.path_name}",
                 level=self.DEFAULT_ERROR_LEVEL,
