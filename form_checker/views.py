@@ -49,3 +49,15 @@ class CheckFormView(LoginRequiredMixin, View):
             "form": form,
         }
         return render(request, self.template_name, content)
+
+
+def test(request):
+    with open('test.html') as file:
+        html = file.read()
+    url = ""
+    preset_name = "TEST"
+    check_result = html_checker.check(preset_name=preset_name, html=html, url=url)
+    content = {
+        "check_result": check_result,
+    }
+    return render(request,  "form_checker/check_result.html", content)

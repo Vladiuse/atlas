@@ -7,4 +7,5 @@ app_name = 'form_checker'
 
 urlpatterns = [
     path('', views.CheckFormView.as_view(), name="check_form_form"),
+    path('test/', views.test),
 ]
