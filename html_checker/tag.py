@@ -50,7 +50,6 @@ class TagChecker:
     def _bind_fields(self) -> None:
         if hasattr(self, "_is_fields_bind"):
             raise RuntimeError("Fields already bound")
-        setattr(self, "_is_fields_bind", True)
         self._fields: dict[str, HtmlTagAttribute | TagChecker] = {}
         for name in dir(self.__class__):
             if name.startswith(("__", "_")) and name != "_class":
@@ -69,6 +68,7 @@ class TagChecker:
                 if hasattr(self, name):
                     raise AttributeError(f'{self} already have attribute "{name}" as field.')
                 self._set_field(field=field, field_name=name)
+        setattr(self, "_is_fields_bind", True)
 
     def _set_field(self, field: Union["TagChecker", HtmlTagAttribute], field_name: str) -> None:
         self._fields[field_name] = field
@@ -91,7 +91,7 @@ class TagChecker:
             get_element_method = getattr(self, GET_ELEMENT_METHOD_NAME)
             element = get_element_method()
             if not (isinstance(element, Tag) or element is None):
-                raise TypeError(f"GET_ELEMENT_METHOD_NAME method must return bs4.Tag type, not {type(element)}")
+                raise TypeError(f"{GET_ELEMENT_METHOD_NAME} method must return bs4.Tag type, not {type(element)}")
             self.elem = element
             return
         if self.elem:
@@ -99,7 +99,7 @@ class TagChecker:
         if self.selector:
             self.elem = self.root.elem.select_one(self.selector)
             return
-        raise AttributeError(f"Set 'elem', 'selector', or define '{GET_ELEMENT_METHOD_NAME}' method in your class")
+        raise AttributeError(f'Set "elem", "selector", or define "{GET_ELEMENT_METHOD_NAME}" method in your class')
 
     def _fill_attributes(self) -> None:
         for attribute_field_name, attribute in self.attributes.items():
@@ -236,6 +236,9 @@ class ListTagChecker:
 
     def __len__(self):
         return len(self.tags_items)
+
+    def exist(self) -> bool:
+        return bool(self.tags_items)
 
     def bind(self, root: "TagChecker", field_name: str) -> None:
         self.root = root
