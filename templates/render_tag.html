@@ -1,4 +1,4 @@
-<details {%if tag_data.errors or tag_data.childrens %} open {%endif%}>
+<details {%if tag_data.errors and tag_data.path_name != html %} open {%endif%}>
   <summary class="{{tag_data.error_level.level}}">{{tag_data.path_name}}</summary>
   <div class="row mb-3">
     <div class="col">
@@ -11,19 +11,19 @@
       </p>
     </div>
     <div class="col">
-      <p>
-        <!-- {{tag_data.errors}} -->
 
-        {%if tag_data.errors.non_field_errors%}
-        {%for error in tag_data.errors.non_field_errors%}
+      <!-- {{tag_data.errors}} -->
+
+      {%if tag_data.errors.non_field_errors%}
+      {%for error in tag_data.errors.non_field_errors%}
       <p class="error-message error-message-{{error.level.level}} text-{{error.level.level}}">
         <span>{{error.message}}</span>
-      </p>
+      </p><br>
       {%endfor%}
       {%else%}
-      <p class="error-message error-message-success text-success"></p>
+      <!-- <p class="error-message error-message-success text-success"></p> -->
       {%endif%}
-      </p>
+
     </div>
   </div>
   {%if tag_data.exist and tag_data.attributes%}
@@ -82,7 +82,7 @@
   {% for child_key, child_tag in tag_data.childrens.items %}
   {% if child_tag.many %}
   {# Это список тегов #}
-  {% for child_data in child_tag.items %}
+  {% for child_data in child_tag %}
   {% include "render_tag.html" with tag_data=child_data %}
   {% endfor %}
   {% else %}

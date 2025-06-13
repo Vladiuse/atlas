@@ -10,6 +10,10 @@
     text-align: center;
   }
 
+  details:not([open]) summary {
+    border-bottom: 1px solid black;
+  }
+
   p {
     margin-top: 0;
     margin-bottom: 0;
@@ -22,10 +26,10 @@
   }
 
   .col {
-    /* padding: 0.5rem; */
-    /* padding-left: 1.5rem; */
     display: flex;
-    align-items: center;
+    align-items: self-start;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .table> :not(caption)>*>* {
