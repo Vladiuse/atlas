@@ -39,7 +39,7 @@ class TagChecker:
         self.not_exist_error_level = not_exist_error_level
         self.elem_number = elem_number
         self._attributes = attributes
-        self._bind_fields()
+        self._fields: dict[str, HtmlTagAttribute | TagChecker] = {}
 
     def __repr__(self):
         return f"<Tag:{self.tag_name}>"
@@ -47,10 +47,10 @@ class TagChecker:
     def __str__(self):
         return repr(self)
 
-
     def _bind_fields(self) -> None:
-        if hasattr(self, "_fields"):
+        if hasattr(self, "_is_fields_bind"):
             raise RuntimeError("Fields already bound")
+        setattr(self, "_is_fields_bind", True)
         self._fields: dict[str, HtmlTagAttribute | TagChecker] = {}
         for name in dir(self.__class__):
             if name.startswith(("__", "_")) and name != "_class":
@@ -80,11 +80,13 @@ class TagChecker:
         self.field_name = field_name
 
     def fill(self) -> None:
+        self._find_elem()
         if self.elem is not None:
+            self._bind_fields()
             self._fill_attributes()
             self._fill_childrens()
 
-    def find_elem(self) -> None:
+    def _find_elem(self) -> None:
         if hasattr(self, GET_ELEMENT_METHOD_NAME):
             get_element_method = getattr(self, GET_ELEMENT_METHOD_NAME)
             element = get_element_method()
@@ -109,9 +111,6 @@ class TagChecker:
 
     def _fill_childrens(self) -> None:
         for child_name, children in self.childrens.items():
-            # elem = self.elem.select_one(children.selector)
-            # children.elem = elem
-            children.find_elem()
             children.fill()
 
     def exist(self) -> bool:
@@ -123,7 +122,8 @@ class TagChecker:
 
     @property
     def childrens(self) -> dict[str, "TagChecker"]:
-        return {field_name: field for field_name, field in self._fields.items() if isinstance(field, TagChecker)}
+        return {field_name: field for field_name, field in self._fields.items() \
+                if isinstance(field, (TagChecker, ListTagChecker))}
 
     def get_short_display(self) -> str:
         if self.elem:
@@ -132,7 +132,11 @@ class TagChecker:
 
     @property
     def tag_name(self) -> str:
-        return self.elem.name if self.elem else self.__class__.__name__
+        if self.elem:
+            return self.elem.name
+        if self.selector:
+            return self.selector
+        return self.__class__.__name__
 
     @property
     def path_name(self) -> str:
@@ -160,7 +164,6 @@ class TagChecker:
         return max_attribute_error_level
 
     def run_validators(self) -> None:
-        self.fill()  # заполняет классы объектами bs4 Tag
         self._run_non_fields_validators()
         if self.elem is not None:  # запускать валидацию атрибутов и вложенных тегов только если текущий тэг найден
             self._run_fields_validation()
@@ -198,7 +201,7 @@ class TagChecker:
                 method(field=field)
             except ValidationError as error:
                 field = getattr(self, field_name)
-                if isinstance(field, TagChecker):
+                if isinstance(field, (TagChecker, ListTagChecker)):
                     if field.many is False:
                         field.errors.setdefault(NON_FIELD_ERROR, []).append(error)
                     else:
@@ -219,7 +222,9 @@ class TagChecker:
         """Hook"""
 
 
-class ListTagChecker(TagChecker):
+class ListTagChecker:
+    DEFAULT_ERROR_LEVEL = levels.ERROR
+
     def __init__(self, field: TagChecker):
         self.field = field
         self.many = True
@@ -231,14 +236,26 @@ class ListTagChecker(TagChecker):
     def __iter__(self):
         return iter(self.items)
 
-    def find_elem(self) -> None:
+    def __len__(self):
+        return len(self.items)
+
+    @property
+    def tag_name(self) -> str:
+        return  self.__class__.__name__
+
+    def bind(self, root: "TagChecker", field_name: str) -> None:
+        self.root = root
+        self.field_name = field_name
+
+    def fill(self) -> None:
         elements = self.root.elem.select(self.field.selector)
         for elem_number, elem in enumerate(elements):
             field = deepcopy(self.field)
-            field.bind(root=self.root, field_name=self.field_name)
             field.elem = elem
             field.elem_number = elem_number + 1
+            field.root = self.root
             self.items.append(field)
+            field.fill()
 
     def run_validators(self) -> None:
         try:
@@ -251,13 +268,21 @@ class ListTagChecker(TagChecker):
         for field in self.items:
             self.errors.append(field.errors)
 
-    def fill(self) -> None:
-        for field in self.items:
-            field.fill()
-
     def _required_validation(self) -> None:
         if self.field.required and len(self.items) == 0:
             raise ValidationError(
                 f"Must provide at least one item: {self.field.path_name}",
                 level=self.DEFAULT_ERROR_LEVEL,
             )
+
+class HtmlTag(TagChecker):
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            *args,
+            many=False,
+            root=None,
+            required=True,
+            selector="html",
+            **kwargs,
+        )
+        self.fill()
