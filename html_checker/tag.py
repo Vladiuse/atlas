@@ -270,7 +270,12 @@ class ListTagChecker:
             )
 
 class HtmlTag(TagChecker):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # noqa: ANN002, ANN003
+        elem = kwargs.get("elem")
+        if not isinstance(elem, Tag):
+            raise TypeError("Expected bs4.Tag for 'elem'")
+        if elem.name != "html":
+            raise ValueError(f"Expected <html> tag, got <{elem.name}>")
         super().__init__(
             *args,
             many=False,
