@@ -212,7 +212,7 @@ class TagChecker:
     def _required_validation(self) -> None:
         if self.required and self.elem is None:
             raise ValidationError(
-                message=f"Tag <{self.__class__.__name__}> required",
+                message=f"{self.tag_name} required",
                 level=self.DEFAULT_ERROR_LEVEL,
             )
 
