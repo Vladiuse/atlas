@@ -1,6 +1,6 @@
 from bs4 import Tag
 
-from html_checker import HtmlTagAttribute, TagChecker, levels
+from html_checker import HtmlTag, HtmlTagAttribute, TagChecker, levels
 from html_checker.exceptions import ValidationError
 from html_checker.utils import find_script_with_js_function
 
@@ -85,8 +85,11 @@ class InjectScriptDetector(TagChecker):
         return find_script_with_js_function(scripts=scripts, js_function_name="injectScript")
 
 
-class AtlasHtml(TagChecker):
-    title = Title(selector='title')
+class AtlasHtml(HtmlTag):
+    title = Title(selector="title")
     form = OrderForm(selector="form", many=True)
     short_img_script = GetShortImageSrcDetector()
     inject_script = InjectScriptDetector()
+
+    header_logo_img = TagChecker(selector="img.def-product-item-image")
+    default_product_img = TagChecker(selector="img.header_9__logo")
