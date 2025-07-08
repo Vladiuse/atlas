@@ -79,7 +79,7 @@ class HtmlTagAttribute:
     def expected_validation(self) -> None:
         if self.expected is None:
             return
-        if self.expected is not isinstance(self.choices, str):
+        if not isinstance(self.expected, str):
             raise TypeError(f'"expected" must be string, got {type(self.choices).__name__}')
         if self._normalize(value=self.value) != self._normalize(value=self.expected):
             raise ValidationError(
