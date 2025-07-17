@@ -30,7 +30,7 @@ SECRET_KEY = SECRETS['django-secret-key']
 DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "atlas.vim-store.ru"]
-
+KEITARO_TOKEN = SECRETS['KT_TOKEN']
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -39,8 +39,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_extensions",
     # aps
     "form_checker.apps.FormCheckerConfig",
+    "landing_preview.apps.LandingPreviewConfig",
 ]
 
 MIDDLEWARE = [
