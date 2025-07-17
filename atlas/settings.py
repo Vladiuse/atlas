@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "landing_preview.apps.LandingPreviewConfig",
 ]
 
+X_FRAME_OPTIONS = 'ALLOWALL'
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
