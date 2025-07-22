@@ -5,19 +5,22 @@ from rest_framework.viewsets import ModelViewSet
 
 from .models import AsanaWebhookRequestData
 from .serializers import AsanaWebhookRequestDataSerializer
+from .services import completed_task_creator
 
 
 @api_view(http_method_names=["POST"])
 def webhook(request, format=None):
     secret = request.headers.get("X-Hook-Secret")
-    AsanaWebhookRequestData.objects.create(
+    asana_webhook = AsanaWebhookRequestData.objects.create(
         headers=dict(request.headers),
         payload=dict(request.data),
     )
+    created = completed_task_creator(asana_webhook_model=asana_webhook)
     data = {
         "success": True,
         "method": request.method,
         "headers": request.headers,
+        "created": len(created),
     }
     response = Response(data=data)
     response["X-Hook-Secret"] = settings.ASANA_HOOK_SECRET if settings.ASANA_HOOK_SECRET else secret
