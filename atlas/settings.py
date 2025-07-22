@@ -3,10 +3,11 @@ import os
 import json
 from dotenv import load_dotenv
 
-load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv()
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,6 +26,7 @@ SECRETS = get_secrets()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = SECRETS['django-secret-key']
+ASANA_HOOK_SECRET = os.environ["ASANA_HOOK_SECRET"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -40,9 +42,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
+    "rest_framework",
     # aps
     "form_checker.apps.FormCheckerConfig",
     "landing_preview.apps.LandingPreviewConfig",
+    "asana.apps.AsanaConfig",
 ]
 
 X_FRAME_OPTIONS = 'ALLOWALL'
