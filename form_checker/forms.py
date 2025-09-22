@@ -3,11 +3,9 @@ from django.core.exceptions import ValidationError
 
 from form_checker.form_checker.presets import PRESETS_MAP
 
-choices = [(preset_name, preset_name) for preset_name in PRESETS_MAP]
-
 
 class CheckFormsByUrlForm(forms.Form):
-    preset_name = forms.ChoiceField(choices=choices)
+    preset_name = forms.ChoiceField(choices=[(c, c) for c in PRESETS_MAP])
     url = forms.URLField(required=False)
     html = forms.CharField(required=False)
 
