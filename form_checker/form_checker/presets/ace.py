@@ -60,5 +60,5 @@ class Form(TagChecker):
     password = PasswordInput()
 
 
-class AceHtml(HtmlTag):
+class AceAffHtml(HtmlTag):
     order_form = Form(selector="form", many=True)
