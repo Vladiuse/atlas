@@ -27,7 +27,7 @@ class TagChecker:
         root: Optional["TagChecker"] = None,
         not_exist_error_level: str = levels.ERROR,
         elem_number: int | None = None,
-        attributes: dict[str: dict] | None = None,
+        attributes: dict[str,dict] | None = None,
     ):
         self.selector = selector if selector else self.SELECTOR
         self.field_name = None
