@@ -1,4 +1,0 @@
-class AppExtension(Exception):
-    pass
-
-

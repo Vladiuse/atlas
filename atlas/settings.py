@@ -1,9 +1,8 @@
-from pathlib import Path
-import os
 import json
+import os
+from pathlib import Path
+
 from dotenv import load_dotenv
-
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,26 +12,28 @@ load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
 def get_secrets() -> dict:
-    file_name = 'secrets.json'
+    file_name = "secrets.json"
     secrets_path = os.path.join(BASE_DIR, file_name)
     with open(secrets_path) as file:
         return json.load(file)
+
 
 SECRETS = get_secrets()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = SECRETS['django-secret-key']
+SECRET_KEY = SECRETS["django-secret-key"]
 ASANA_HOOK_SECRET = os.environ["ASANA_HOOK_SECRET"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "atlas.vim-store.ru"]
-KEITARO_TOKEN = SECRETS['KT_TOKEN']
+KEITARO_TOKEN = SECRETS["KT_TOKEN"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -45,11 +46,8 @@ INSTALLED_APPS = [
     "rest_framework",
     # aps
     "form_checker.apps.FormCheckerConfig",
-    "landing_preview.apps.LandingPreviewConfig",
-    "asana.apps.AsanaConfig",
 ]
 
-X_FRAME_OPTIONS = 'ALLOWALL'
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -65,7 +63,7 @@ ROOT_URLCONF = "atlas.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'templates')],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -85,24 +83,24 @@ WSGI_APPLICATION = "atlas.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 # for MySql database remote server
-if os.environ.get('DB') == 'sqlite':
+if os.environ.get("DB") == "sqlite":
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         },
     }
 else:
     DATABASES = {
-         'default': {
-             'ENGINE': 'django.db.backends.mysql',
-             'NAME': SECRETS['DB_NAME'],
-             'USER': SECRETS['DB_USER'],
-             'PASSWORD': SECRETS['DB_PASSWORD'],
-             'HOST': SECRETS['DB_HOST'],
-             'PORT': '3306',
-         },
-     }
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": SECRETS["DB_NAME"],
+            "USER": SECRETS["DB_USER"],
+            "PASSWORD": SECRETS["DB_PASSWORD"],
+            "HOST": SECRETS["DB_HOST"],
+            "PORT": "3306",
+        },
+    }
 
 
 # Password validation
@@ -124,9 +122,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LOGIN_URL = '/login/'
+LOGIN_URL = "/login/"
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = LOGIN_URL
 
 # Internationalization
@@ -145,7 +143,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = '/home/v/vladiuse/atlas.vim-store.ru/public_html/static'
+STATIC_ROOT = "/home/v/vladiuse/atlas.vim-store.ru/public_html/static"
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",  # BASE_DIR — это путь к корню проекта
