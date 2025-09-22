@@ -90,7 +90,7 @@ class HtmlTagAttribute:
     def choices_validation(self) -> None:
         if self.choices is None:
             return
-        if self.choices is not isinstance(self.choices, (list, tuple)):
+        if not isinstance(self.choices, (list, tuple)):
             raise TypeError(f'"choices" must be a list or tuple of strings, got {type(self.choices).__name__}')
         if self._normalize(value=self.value) not in [self._normalize(value=choice) for choice in self.choices]:
             raise ValidationError(
