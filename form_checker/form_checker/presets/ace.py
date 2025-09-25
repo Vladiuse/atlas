@@ -57,6 +57,7 @@ class Form(TagChecker):
     first_name = FirstNameInput()
     last_name = LastNameInput()
     email = EmailInput()
+    phone = TagChecker(selector="input[name=phone]", attributes={"type": {"expected": "tel"}})
     password = PasswordInput()
 
 
