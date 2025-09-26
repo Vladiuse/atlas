@@ -25,7 +25,7 @@ class EmailInput(TagChecker):
 
 class PasswordInput(TagChecker):
     SELECTOR = "input[name=password]"
-    type = HtmlTagAttribute(expected="text")
+    type = HtmlTagAttribute(choices=["text", "hidden"])
     required = HtmlTagAttribute()
 
 class PhoneCcValue(HtmlTagAttribute):
