@@ -5,14 +5,14 @@ from html_checker.exceptions import ValidationError
 class FirstNameInput(TagChecker):
     SELECTOR = "input[name=first_name]"
     type = HtmlTagAttribute(expected="text")
-    pattern = HtmlTagAttribute(expected="[A-Za-z\s\-]{2,}")
+    pattern = HtmlTagAttribute(expected="^[\p{L}]{2,}$")
     required = HtmlTagAttribute()
 
 
 class LastNameInput(TagChecker):
     SELECTOR = "input[name=last_name]"
     type = HtmlTagAttribute(expected="text")
-    pattern = HtmlTagAttribute(expected="[A-Za-z\s\-]{2,}")
+    pattern = HtmlTagAttribute(expected="^[\p{L}]{2,}$")
     required = HtmlTagAttribute()
 
 
